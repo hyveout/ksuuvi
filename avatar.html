@@ -1,0 +1,1528 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>KSUUVI — Avatar Creator</title>
+<link rel="icon" type="image/png" href="assets/avatar-button.png">
+<link rel="apple-touch-icon" href="assets/avatar-button.png">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; overflow-x: hidden; max-width: 100%; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 100%),
+      url("assets/brick-wall.jpg");
+    background-size: 100% 100%, 560px auto;
+    background-repeat: no-repeat, repeat;
+    background-position: top, top left;
+    background-attachment: fixed, scroll;
+    background-color: #6a3220;
+    min-height: 100vh;
+    padding: 14px 0 44px;
+    image-rendering: -webkit-optimize-contrast;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* ============ Storefront sign (same as homepage) ============ */
+  .topbar-wrap {
+    margin: 0 auto 12px;
+    position: relative;
+    z-index: 5;
+    width: max-content;
+    max-width: 96vw;
+    filter: drop-shadow(0 6px 0 rgba(0,0,0,0.55)) drop-shadow(0 14px 22px rgba(0,0,0,0.5));
+  }
+  .topbar-wrap img.sign-bg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .topbar {
+    position: relative; z-index: 1;
+    padding: 14px 28px;
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+  }
+  .topbar .brand { flex-shrink: 0; line-height: 0; transform: rotate(-1.5deg); filter: drop-shadow(0 3px 0 rgba(0,0,0,0.35)); }
+  .topbar .brand img { display: block; height: 80px; width: auto; }
+  .topbar .avatar-star {
+    line-height: 0; flex-shrink: 0;
+    position: relative;
+    display: inline-block;
+    transform: rotate(6deg);
+    transition: transform 0.15s ease, filter 0.15s ease;
+    cursor: pointer;
+    filter: drop-shadow(2px 4px 0 rgba(0,0,0,0.45)) drop-shadow(0 6px 10px rgba(0,0,0,0.4));
+    animation: starwobble 3s ease-in-out infinite;
+  }
+  .topbar .avatar-star:hover {
+    transform: rotate(0deg) scale(1.1);
+    filter: drop-shadow(2px 5px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 14px rgba(0,0,0,0.5)) brightness(1.05);
+    animation: none;
+  }
+  .topbar .avatar-star:active { transform: rotate(0deg) scale(1.04); }
+  @keyframes starwobble {
+    0%, 100% { transform: rotate(6deg); }
+    50% { transform: rotate(10deg) translateY(-3px); }
+  }
+  .topbar .avatar-star img.face { display: block; height: 92px; width: auto; }
+  .goback-bubble {
+    position: absolute;
+    top: -10px;
+    right: -22px;
+    background: linear-gradient(180deg, #ffe066 0%, #ffb820 60%, #c97604 100%);
+    border: 2px solid #1a0a04;
+    color: #1a0a04;
+    font-family: "Comic Sans MS", "Marker Felt", Impact, "Arial Black", sans-serif;
+    font-weight: 900;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    padding: 4px 9px 4px;
+    border-radius: 14px;
+    box-shadow:
+      0 2px 0 #1a0a04,
+      0 4px 8px rgba(0,0,0,0.45),
+      inset 0 2px 0 rgba(255,255,255,0.55);
+    white-space: nowrap;
+    transform: rotate(-6deg);
+    pointer-events: none;
+    z-index: 2;
+  }
+  @media (min-width: 520px) {
+    .topbar .brand img { height: 110px; }
+    .topbar .avatar-star img.face { height: 130px; }
+    .topbar { gap: 22px; padding: 18px 36px; }
+    .goback-bubble { font-size: 17px; padding: 7px 14px 8px; top: -14px; right: -30px; border-radius: 22px; }
+  }
+
+  /* ============ Storefront (pelmet + shutter) ============ */
+  .storefront { max-width: 760px; margin: 0 auto; position: relative; }
+
+  .pelmet-box {
+    position: relative;
+    z-index: 5;
+    width: min(742px, 100vw);
+    margin: 0 auto -8px;
+    filter: drop-shadow(0 12px 16px rgba(0,0,0,0.55));
+  }
+  .pelmet-top {
+    height: 14px;
+    background: linear-gradient(180deg, #4a3018 0%, #6e4a26 40%, #5a3a1c 70%, #2a1808 100%);
+    border-top: 2px solid #1a0a04;
+    border-left: 2px solid #1a0a04;
+    border-right: 2px solid #1a0a04;
+    border-radius: 6px 6px 0 0;
+    box-shadow: inset 0 2px 0 rgba(255,200,140,0.18), inset 0 -3px 6px rgba(0,0,0,0.5);
+    position: relative;
+  }
+  .pelmet-top::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -3px;
+    height: 3px; background: linear-gradient(180deg, #0a0604, #1a0a04);
+  }
+  .pelmet-face {
+    position: relative;
+    background:
+      radial-gradient(ellipse at 50% 50%, transparent 35%, rgba(0,0,0,0.45) 100%),
+      url("assets/rust-texture.jpg");
+    background-size: 100% 100%, cover;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+    background-blend-mode: multiply, normal;
+    border-left: 3px solid #1a0a04;
+    border-right: 3px solid #1a0a04;
+    padding: 10px 16px 12px;
+    box-shadow:
+      inset 0 2px 0 rgba(255,210,160,0.25),
+      inset 0 -4px 10px rgba(0,0,0,0.55),
+      inset 3px 0 8px rgba(0,0,0,0.4),
+      inset -3px 0 8px rgba(0,0,0,0.4);
+    text-align: center;
+    min-height: 32px;
+  }
+  .pelmet-face::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(180deg,
+      rgba(0,0,0,0) 0px, rgba(0,0,0,0.08) 3px,
+      rgba(0,0,0,0) 7px, rgba(255,255,255,0.03) 14px, rgba(0,0,0,0) 22px);
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+  .pelmet-bottom {
+    height: 16px;
+    background: linear-gradient(180deg, #2a1808 0%, #1a0a04 50%, #0a0402 100%);
+    border-bottom: 2px solid #050201;
+    border-left: 2px solid #1a0a04;
+    border-right: 2px solid #1a0a04;
+    border-radius: 0 0 4px 4px;
+    box-shadow:
+      inset 0 2px 4px rgba(0,0,0,0.7),
+      inset 0 -1px 0 rgba(80,40,18,0.3),
+      0 4px 8px rgba(0,0,0,0.5);
+  }
+
+  /* Corrugated shutter */
+  .spine {
+    position: relative;
+    margin: 0 auto;
+    width: min(720px, 96vw);
+    background:
+      radial-gradient(ellipse at 12% 8%, rgba(0,0,0,0.22) 0%, transparent 30%),
+      radial-gradient(ellipse at 88% 18%, rgba(0,0,0,0.18) 0%, transparent 35%),
+      radial-gradient(ellipse at 30% 70%, rgba(0,0,0,0.15) 0%, transparent 40%),
+      radial-gradient(ellipse at 75% 85%, rgba(0,0,0,0.20) 0%, transparent 35%),
+      repeating-linear-gradient(180deg,
+        #4a4a4a 0px, #c0c0c0 1px, #d8d8d8 3px, #9c9c9c 5px, #383838 6px, #4a4a4a 7px),
+      linear-gradient(90deg, #4a4a4a 0%, #787878 8%, #a4a4a4 30%, #b4b4b4 50%, #a4a4a4 70%, #787878 92%, #4a4a4a 100%);
+    background-blend-mode: multiply, multiply, multiply, multiply, normal, normal;
+    border-left: 14px solid #1d2a26;
+    border-right: 14px solid #1d2a26;
+    box-shadow:
+      0 0 0 3px #0a110f,
+      inset 14px 0 22px -10px rgba(0,0,0,0.6),
+      inset -14px 0 22px -10px rgba(0,0,0,0.6),
+      0 18px 36px rgba(0,0,0,0.65);
+    padding: 18px 22px 28px;
+  }
+
+  /* ============ Creator content ============ */
+  .creator-title {
+    font-family: Impact, "Arial Black", sans-serif;
+    color: #fff8e0;
+    text-align: center;
+    font-size: clamp(20px, 4.2vw, 28px);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    text-shadow: 3px 3px 0 #2a0a04, 0 4px 10px rgba(0,0,0,0.6);
+    margin: 0 0 14px;
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+  }
+  .creator-title .star {
+    color: #ffb820;
+    font-size: 0.85em;
+    text-shadow: 2px 2px 0 #2a0a04;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+  }
+
+  /* Character canvas */
+  .canvas-frame {
+    position: relative;
+    width: min(420px, 92%);
+    margin: 0 auto;
+    aspect-ratio: 1 / 1;
+    background: #f4ecd8;
+    border: 3px solid #1a0a04;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow:
+      0 6px 0 #1a0a04,
+      0 10px 20px rgba(0,0,0,0.55),
+      inset 0 0 0 2px rgba(255,255,255,0.35),
+      inset 0 0 60px rgba(160,120,60,0.18);
+  }
+  /* Selected background sits behind everything in the canvas */
+  .canvas-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+  }
+  /* URL watermark stamped inside the canvas so it's baked into exports */
+  .canvas-watermark {
+    position: absolute;
+    left: 50%;
+    bottom: 6px;
+    transform: translateX(-50%);
+    z-index: 5;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 900;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: #fff;
+    text-shadow:
+      1px 1px 0 #1a0a04,
+     -1px 1px 0 #1a0a04,
+      1px -1px 0 #1a0a04,
+     -1px -1px 0 #1a0a04,
+      0 2px 3px rgba(0,0,0,0.6);
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .canvas-frame .corner-star {
+    position: absolute;
+    width: 22px; height: 22px;
+    color: #d64a2a;
+    font-size: 22px;
+    line-height: 1;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,0.3));
+    pointer-events: none;
+    user-select: none;
+  }
+  .canvas-frame .corner-star.tl { top: 10px; left: 12px; transform: rotate(-8deg); }
+  .canvas-frame .corner-star.br { bottom: 10px; right: 12px; transform: rotate(12deg); }
+
+  .character-stack {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 6% 8% 4%;
+  }
+  .character-stack img,
+  .character-stack canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: bottom center;
+    image-rendering: -webkit-optimize-contrast;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    /* Subtle black outline around every character/clothing PNG */
+    filter:
+      drop-shadow( 1px  0 0 #000)
+      drop-shadow(-1px  0 0 #000)
+      drop-shadow( 0  1px 0 #000)
+      drop-shadow( 0 -1px 0 #000);
+  }
+  /* Canvas needs display:block + contain-fit like the img */
+  .character-stack canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  /* Color-swatch strip inside the wardrobe */
+  .color-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px 4px 10px;
+  }
+  .color-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .color-row-label {
+    width: 62px;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 12px;
+    color: #f4ecd8;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+  }
+  .swatches {
+    display: flex;
+    flex: 1;
+    gap: 5px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .swatches::-webkit-scrollbar { height: 4px; }
+  .swatches::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.3); border-radius: 2px; }
+  .swatch {
+    width: 22px; height: 22px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid #1a0a04;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: transform 0.1s ease;
+    position: relative;
+  }
+  .swatch:hover { transform: translateY(-1px) scale(1.06); }
+  .swatch.selected {
+    box-shadow: 0 0 0 3px #ffc04a, 0 2px 0 rgba(0,0,0,0.5);
+  }
+  /* Layered clothing sits on top of the base */
+  .character-stack .layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 6% 8% 4%; /* match .character-stack padding */
+    pointer-events: none;
+  }
+  .character-stack .layer .garment-img,
+  .tile .preview-stack .garment-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: bottom center;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  /* Inside a tile the garment PNG sits exactly on top of the thumb base */
+  .tile .preview-stack .garment-img {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Action row */
+  .action-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 18px auto 14px;
+    flex-wrap: wrap;
+  }
+  .action-btn {
+    appearance: none;
+    background: linear-gradient(180deg, #fff8e0 0%, #f4dfa8 55%, #d8b46a 100%);
+    border: 2px solid #1a0a04;
+    color: #1a0a04;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 14px 8px 12px;
+    border-radius: 4px;
+    box-shadow: 0 3px 0 #1a0a04, inset 0 2px 0 rgba(255,255,255,0.7);
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: transform 0.06s ease, box-shadow 0.06s ease;
+  }
+  .action-btn .star { color: #d97a10; text-shadow: 1px 1px 0 rgba(0,0,0,0.35); }
+  .action-btn:hover { filter: brightness(1.03); }
+  .action-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #1a0a04, inset 0 2px 0 rgba(255,255,255,0.7); }
+
+  /* Share row: same button chrome, tinted variants */
+  .share-row { margin-top: 4px; }
+  .share-btn .share-icon { flex-shrink: 0; margin-right: 2px; }
+  .share-btn.share-ig {
+    background: linear-gradient(135deg, #feda75 0%, #fa7e1e 25%, #d62976 55%, #962fbf 80%, #4f5bd5 100%);
+    color: #fff;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.35);
+  }
+  .share-btn.share-x {
+    background: linear-gradient(180deg, #2a2a2a 0%, #0a0a0a 100%);
+    color: #fff;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.35);
+  }
+
+  /* Share modal (appears after IG click since IG has no web share intent) */
+  .share-modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(20, 10, 4, 0.65);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .share-modal-backdrop.open { display: flex; }
+  .share-modal {
+    background: #fff8e0;
+    border: 3px solid #1a0a04;
+    border-radius: 6px;
+    box-shadow: 0 8px 0 #1a0a04, 0 14px 30px rgba(0,0,0,0.5);
+    padding: 20px 22px 18px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #1a0a04;
+  }
+  .share-modal h2 {
+    margin: 0 0 10px;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+  }
+  .share-modal p {
+    margin: 0 0 14px;
+    font-size: 13.5px;
+    line-height: 1.45;
+  }
+  .share-modal ol {
+    text-align: left;
+    margin: 0 0 14px 22px;
+    padding: 0;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  .share-modal .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .share-modal .modal-btn {
+    appearance: none;
+    padding: 8px 14px;
+    border: 2px solid #1a0a04;
+    border-radius: 4px;
+    background: #f4dfa8;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 2px 0 #1a0a04;
+  }
+  .share-modal .modal-btn.primary {
+    background: linear-gradient(135deg, #feda75 0%, #fa7e1e 25%, #d62976 55%, #962fbf 80%, #4f5bd5 100%);
+    color: #fff;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.35);
+  }
+  .share-modal .modal-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #1a0a04; }
+
+  /* Toast for quick feedback */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    background: #1a0a04;
+    color: #fff8e0;
+    padding: 10px 16px;
+    border-radius: 4px;
+    border: 2px solid #ffc04a;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+
+  /* Category tabs */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin: 6px auto 0;
+    background: linear-gradient(180deg, #2a1808, #1a0a04);
+    border: 2px solid #1a0a04;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    padding: 6px 6px 0;
+    width: fit-content;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+  .tab {
+    appearance: none;
+    background: linear-gradient(180deg, #6a4a2a 0%, #4a2e14 100%);
+    border: 2px solid #1a0a04;
+    border-bottom: none;
+    color: #d8c8a0;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    border-radius: 5px 5px 0 0;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,220,170,0.2);
+    transition: filter 0.12s ease, transform 0.06s ease;
+    margin-right: 2px;
+    position: relative;
+    top: 2px;
+  }
+  .tab:hover:not(.disabled) { filter: brightness(1.1); }
+  .tab.active {
+    background: linear-gradient(180deg, #ffe28a 0%, #e8b048 55%, #b87418 100%);
+    color: #1a0a04;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.35);
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.6), 0 -2px 6px rgba(0,0,0,0.3);
+    top: 0;
+    padding: 10px 14px;
+    z-index: 2;
+  }
+  .tab.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(0.4);
+  }
+
+  /* Wardrobe panel */
+  .wardrobe {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255,220,170,0.08) 0%, transparent 60%),
+      linear-gradient(180deg, #5a3a1c 0%, #3e2810 100%);
+    border: 3px solid #1a0a04;
+    border-radius: 0 0 6px 6px;
+    padding: 14px 14px 18px;
+    box-shadow: inset 0 2px 0 rgba(255,210,160,0.15), inset 0 -4px 10px rgba(0,0,0,0.4);
+    margin: 0 auto;
+  }
+  .wardrobe-title {
+    text-align: center;
+    font-family: Impact, "Arial Black", sans-serif;
+    color: #fff8e0;
+    font-size: 14px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 0 #1a0a04;
+    margin: 2px 0 12px;
+  }
+  .wardrobe-title .accent { color: #ffb820; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  @media (max-width: 520px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .tile {
+    position: relative;
+    background: #f4ecd8;
+    border: 2px solid #1a0a04;
+    border-radius: 4px;
+    aspect-ratio: 1 / 1;
+    cursor: pointer;
+    overflow: hidden;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  .tile:hover { transform: translateY(-1px); box-shadow: 0 3px 0 rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3); }
+  .tile.selected {
+    border-color: #b87418;
+    box-shadow: 0 0 0 3px #ffc04a, 0 2px 0 rgba(0,0,0,0.5);
+    background: #fff8e0;
+  }
+  .tile .idx {
+    position: absolute;
+    top: 3px; left: 5px;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 10px;
+    color: #7a5a2a;
+    letter-spacing: 0.02em;
+  }
+  .tile .label {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    background: rgba(20,10,4,0.78);
+    color: #fff8e0;
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-align: center;
+    padding: 3px 4px;
+    text-transform: uppercase;
+  }
+  .tile .thumb {
+    width: 82%;
+    height: 82%;
+    object-fit: contain;
+    object-position: bottom center;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .tile .none-dash {
+    width: 22px; height: 3px;
+    background: #1a0a04;
+    border-radius: 2px;
+    opacity: 0.65;
+  }
+
+  /* When the tile is a preview of the character with an item on */
+  .tile .preview-stack {
+    position: relative;
+    width: 82%;
+    height: 82%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .tile .preview-stack img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: bottom center;
+  }
+  /* Simple colored garment for tile previews (until real art) */
+  .garment-swatch {
+    position: absolute;
+    left: 22%;
+    right: 22%;
+    top: 40%;
+    bottom: 26%;
+    border: 2px solid #1a0a04;
+    border-radius: 4px 4px 2px 2px;
+    box-shadow: inset 0 3px 0 rgba(255,255,255,0.25), inset 0 -3px 0 rgba(0,0,0,0.25);
+  }
+  .bottoms-swatch {
+    position: absolute;
+    left: 30%;
+    right: 30%;
+    top: 65%;
+    bottom: 8%;
+    border: 2px solid #1a0a04;
+    border-radius: 2px 2px 3px 3px;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.25);
+  }
+</style>
+</head>
+<body>
+
+<!-- Storefront sign -->
+<div class="topbar-wrap">
+  <img class="sign-bg" src="assets/storefront-sign-v2.png" alt="">
+  <div class="topbar">
+    <a class="brand" href="index.html">
+      <img src="assets/uptown-baby-v2-cropped.png" alt="UPTOWN BABY">
+    </a>
+    <a class="avatar-star" href="index.html" aria-label="Go back">
+      <img class="face" src="assets/avatar-button.png" alt="Go back">
+      <span class="goback-bubble">Go Back!</span>
+    </a>
+  </div>
+</div>
+
+<div class="storefront">
+
+  <!-- Pelmet -->
+  <div class="pelmet-box">
+    <div class="pelmet-top"></div>
+    <div class="pelmet-face"></div>
+    <div class="pelmet-bottom"></div>
+  </div>
+
+  <!-- Shutter -->
+  <div class="spine">
+    <h1 class="creator-title">
+      <span class="star">★</span> Build Your Ksuuvi <span class="star">★</span>
+    </h1>
+
+    <!-- Character canvas -->
+    <div class="canvas-frame" id="canvasFrame">
+      <img class="canvas-bg" id="canvasBg" alt="" style="display:none;">
+      <span class="corner-star tl">★</span>
+      <span class="corner-star br">★</span>
+      <div class="character-stack" id="characterStack">
+        <!-- Base avatar is a CANVAS so we can recolor beanie/hair/skin/eyes -->
+        <canvas id="charBase" width="1024" height="1024" aria-label="Your Ksuuvi"></canvas>
+        <!-- If a top+bottom combo has a paired outfit PNG, it renders here as a single image. -->
+        <div class="layer" id="layerCombo"></div>
+        <!-- Otherwise these fill in with separate top and bottom PNGs. -->
+        <div class="layer" id="layerBottoms"></div>
+        <div class="layer" id="layerTop"></div>
+      </div>
+      <div class="canvas-watermark">www.uptownbaby.net</div>
+    </div>
+
+    <!-- Actions -->
+    <div class="action-row">
+      <button class="action-btn" id="btnRandomize"><span class="star">★</span> Randomize</button>
+      <button class="action-btn" id="btnReset">Reset</button>
+    </div>
+    <div class="action-row share-row">
+      <button class="action-btn share-btn" id="btnSave" title="Download as PNG">
+        <svg class="share-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        Save Image
+      </button>
+      <button class="action-btn share-btn share-ig" id="btnShareIG" title="Share on Instagram">
+        <svg class="share-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/></svg>
+        Instagram
+      </button>
+      <button class="action-btn share-btn share-x" id="btnShareX" title="Share on X">
+        <svg class="share-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M17.53 3H20.5l-6.48 7.4L21.75 21h-5.99l-4.7-6.14L5.6 21H2.6l6.94-7.93L2.25 3h6.14l4.24 5.62L17.53 3zm-1.05 16.2h1.66L7.6 4.72H5.83l10.65 14.48z"/></svg>
+        Share on X
+      </button>
+    </div>
+
+    <!-- Category tabs -->
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-cat="tops">Tops</button>
+      <button class="tab" data-cat="bottoms">Bottoms</button>
+      <button class="tab" data-cat="backgrounds">Backgrounds</button>
+    </div>
+
+    <!-- Wardrobe -->
+    <div class="wardrobe">
+      <div class="wardrobe-title">Pick your <span class="accent" id="wardrobeCategory">tops</span></div>
+      <div class="grid" id="wardrobeGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Share-to-Instagram modal (IG has no web image share intent) -->
+<div class="share-modal-backdrop" id="shareModal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
+  <div class="share-modal">
+    <h2 id="shareModalTitle">Share to Instagram</h2>
+    <p>Your Ksuuvi image was saved. Instagram doesn't allow direct posting from the web, so here's the flow:</p>
+    <ol>
+      <li>Open the Instagram app</li>
+      <li>Tap <b>+ New Post</b> (or Story)</li>
+      <li>Pick the <b>ksuuvi-avatar.png</b> file you just downloaded</li>
+      <li>Tag <b>@uptownbaby</b> so we can repost!</li>
+    </ol>
+    <div class="modal-actions">
+      <button class="modal-btn primary" id="modalOpenIG">Open Instagram</button>
+      <button class="modal-btn" id="modalClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Feedback toast -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  // --- Wardrobe data ---
+  // Tops and bottoms are separate lists. If a specific top+bottom pairing has a
+  // hand-drawn combo PNG in COMBOS, we render THAT single image instead of
+  // layering the two separately — keeps paired art looking clean.
+  // "None" is always index 0.
+  const TOPS = [
+    { id: 'none',    label: 'None' },
+    { id: 'guns',    label: 'Guns Tee',    img: 'assets/top-guns.png' },
+    { id: '1c34',    label: '1c34 Tee',    img: 'assets/top-1c34.png' },
+    { id: 'supreme', label: 'Supreme',     img: 'assets/top-supreme.png' },
+    { id: 'hoodie',  label: 'Grey Hoodie', img: 'assets/top-hoodie.png' },
+  ];
+  const BOTTOMS = [
+    { id: 'none',         label: 'None' },
+    { id: 'jeans-vans',   label: 'Jeans + Vans',    img: 'assets/bottom-jeans-vans.png' },
+    { id: 'black-chucks', label: 'Black + Chucks',  img: 'assets/bottom-black-chucks.png' },
+    { id: 'sweats-slides',label: 'Sweats + Slides', img: 'assets/bottom-sweats-slides.png' },
+    { id: 'black-crocs',  label: 'Black + Crocs',   img: 'assets/bottom-black-crocs.png' },
+  ];
+  const BACKGROUNDS = [
+    { id: 'none',        label: 'None' },
+    { id: 'buckets-xt',  label: 'Buckets XT', img: 'assets/bg-buckets-xt.png' },
+  ];
+
+  // --- Color palettes for the recolor sliders ---
+  // First entry in each palette is "default" (matches source PNG).
+  const COLORS = {
+    beanie: [
+      { id: 'default', hex: '#b8b8b8', label: 'Grey' },
+      { id: 'black',   hex: '#2a2a2a' },
+      { id: 'red',     hex: '#c8362f' },
+      { id: 'blue',    hex: '#2a5cc8' },
+      { id: 'green',   hex: '#3a8a48' },
+      { id: 'yellow',  hex: '#e8c33a' },
+      { id: 'pink',    hex: '#e274a8' },
+      { id: 'purple',  hex: '#7a3ea8' },
+      { id: 'orange',  hex: '#e07a2a' },
+    ],
+    hair: [
+      { id: 'default', hex: '#3a2418', label: 'Dark Brown' },
+      { id: 'black',   hex: '#1a0f08' },
+      { id: 'brown',   hex: '#7a4a24' },
+      { id: 'blonde',  hex: '#d4a34a' },
+      { id: 'red',     hex: '#a83820' },
+      { id: 'pink',    hex: '#e074a8' },
+      { id: 'blue',    hex: '#3a6ac8' },
+      { id: 'purple',  hex: '#7a3ea8' },
+      { id: 'green',   hex: '#3a8a48' },
+    ],
+    skin: [
+      { id: 'default', hex: '#e8b890', label: 'Light' },
+      { id: 'pale',    hex: '#f4d4b4' },
+      { id: 'tan',     hex: '#d49868' },
+      { id: 'olive',   hex: '#b88250' },
+      { id: 'brown',   hex: '#8a5a38' },
+      { id: 'dark',    hex: '#5a3820' },
+    ],
+    eyes: [
+      { id: 'default', hex: '#3a6ac8', label: 'Blue' },
+      { id: 'brown',   hex: '#5a3820' },
+      { id: 'green',   hex: '#3a8a48' },
+      { id: 'hazel',   hex: '#a07038' },
+      { id: 'grey',    hex: '#7a8a98' },
+      { id: 'violet',  hex: '#7a3ea8' },
+    ],
+  };
+
+  // Combo lookup: key is "topId:bottomId" → hand-drawn full-body outfit PNG.
+  // When both selections match a key here, we swap to the single combo image.
+  // Add new entries as more combos are provided.
+  const COMBOS = {
+    // Black shorts + Chucks
+    'guns:black-chucks':    'assets/outfit-guns-black-chucks.png',
+    '1c34:black-chucks':    'assets/outfit-1c34-black-chucks.png',
+    'supreme:black-chucks': 'assets/outfit-supreme-black-chucks.png',
+    'hoodie:black-chucks':  'assets/outfit-hoodie-black-chucks.png',
+    // Jeans + Vans
+    'guns:jeans-vans':      'assets/outfit-guns-jeans-vans.png',
+    '1c34:jeans-vans':      'assets/outfit-1c34-jeans-vans.png',
+    'supreme:jeans-vans':   'assets/outfit-supreme-jeans-vans.png',
+    'hoodie:jeans-vans':    'assets/outfit-hoodie-jeans-vans.png',
+    // Black shorts + Crocs
+    'guns:black-crocs':     'assets/outfit-guns-black-crocs.png',
+    '1c34:black-crocs':     'assets/outfit-1c34-black-crocs.png',
+    'supreme:black-crocs':  'assets/outfit-supreme-black-crocs.png',
+    'hoodie:black-crocs':   'assets/outfit-hoodie-black-crocs.png',
+    // Sweats + Slides
+    'guns:sweats-slides':    'assets/outfit-guns-sweats-slides.png',
+    '1c34:sweats-slides':    'assets/outfit-1c34-sweats-slides.png',
+    'supreme:sweats-slides': 'assets/outfit-supreme-sweats-slides.png',
+    'hoodie:sweats-slides':  'assets/outfit-hoodie-sweats-slides.png',
+  };
+
+  const CATS = { tops: TOPS, bottoms: BOTTOMS, backgrounds: BACKGROUNDS };
+
+  // --- State ---
+  const state = {
+    category: 'tops',
+    selected: { tops: 0, bottoms: 0, backgrounds: 0 },
+    colors: { beanie: 0, hair: 0, skin: 0, eyes: 0 },
+  };
+
+  const LS_KEY = 'ksuuvi_avatar_v4';
+  try {
+    const saved = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+    if (saved && saved.selected) state.selected = { ...state.selected, ...saved.selected };
+    if (saved && saved.category) state.category = saved.category;
+    if (saved && saved.colors)   state.colors   = { ...state.colors, ...saved.colors };
+  } catch (e) {}
+
+  const persist = () => {
+    try { localStorage.setItem(LS_KEY, JSON.stringify({ selected: state.selected, category: state.category, colors: state.colors })); } catch (e) {}
+  };
+
+  // --- Rendering ---
+  const gridEl = document.getElementById('wardrobeGrid');
+  const wardrobeCategoryEl = document.getElementById('wardrobeCategory');
+  const layerCombo   = document.getElementById('layerCombo');
+  const layerBottoms = document.getElementById('layerBottoms');
+  const layerTop     = document.getElementById('layerTop');
+  const charBase     = document.getElementById('charBase');
+  const canvasBg     = document.getElementById('canvasBg');
+  const canvasFrame  = document.getElementById('canvasFrame');
+
+  // ============================================================
+  // Base avatar recoloring: sample pixels of the base PNG, classify
+  // each pixel as beanie / hair / skin / eyes / other by color range,
+  // then recolor while preserving shading (lightness offset from
+  // the source region's average).
+  // ============================================================
+  let baseSourceImg = null;         // HTMLImageElement of the untouched base PNG
+  let basePixelClasses = null;      // Uint8Array parallel to imageData: 0=other, 1=beanie, 2=hair, 3=skin, 4=eyes
+  let baseSourceData = null;        // ImageData of the untouched base PNG
+  let baseAvgLightness = {};        // per-class average L (0..1) from source
+
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+    return [h, s, l];
+  }
+  function hslToRgb(h, s, l) {
+    let r, g, b;
+    if (s === 0) { r = g = b = l; }
+    else {
+      const hue2rgb = (p, q, t) => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
+    }
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+  }
+  function hexToRgb(hex) {
+    const m = hex.replace('#','').match(/.{2}/g);
+    return [parseInt(m[0],16), parseInt(m[1],16), parseInt(m[2],16)];
+  }
+
+  // Classifier: given r,g,b (0..255) return part id (1..4) or 0 for other.
+  // Ranges tuned for the default avatar art:
+  //   BEANIE: grey (near-neutral, mid lightness)
+  //   HAIR:   dark warm brown (very dark, slightly warm)
+  //   SKIN:   peach (warm, high lightness, moderate saturation)
+  //   EYES:   saturated blue iris
+  function classifyPixel(r, g, b, a) {
+    if (a < 200) return 0; // transparent
+    const [h, s, l] = rgbToHsl(r, g, b);
+    const maxCh = Math.max(r, g, b);
+    const minCh = Math.min(r, g, b);
+    const range = maxCh - minCh;
+
+    // EYES first (small region, most saturated blue in the whole image)
+    if (h > 0.55 && h < 0.72 && s > 0.35 && l > 0.15 && l < 0.75) return 4;
+
+    // HAIR: very dark warm brown/black. Low lightness, warm hue.
+    if (l < 0.22 && (h < 0.15 || h > 0.9) && range < 60) return 2;
+    if (l < 0.30 && r > g && g > b && range > 5 && range < 80) return 2;
+
+    // BEANIE: grey (low saturation, mid lightness range around the original ~b8b8b8)
+    if (s < 0.10 && l > 0.35 && l < 0.85) return 1;
+
+    // SKIN: peach — warm hue, moderate saturation, high lightness
+    if (h < 0.10 && s > 0.15 && s < 0.55 && l > 0.55 && l < 0.90 && r > g && g > b) return 3;
+    if (h > 0.92 && s > 0.15 && s < 0.55 && l > 0.55 && l < 0.90) return 3; // wrap around
+
+    return 0;
+  }
+
+  // Cache of loaded HTMLImageElements by src, so we don't re-fetch every render.
+  // Load with crossOrigin='anonymous' first (needed for getImageData without
+  // taint), but fall back to a plain load if that fails — we'd rather show
+  // the avatar than block on CORS.
+  const imageCache = new Map();
+  function getImage(src) {
+    if (imageCache.has(src)) return imageCache.get(src);
+    const load = (useCors) => new Promise((res, rej) => {
+      const img = new Image();
+      if (useCors) img.crossOrigin = 'anonymous';
+      img.onload = () => res(img);
+      img.onerror = () => rej(new Error('image load failed: ' + src));
+      img.src = src;
+    });
+    const p = load(true).catch(() => load(false));
+    imageCache.set(src, p);
+    return p;
+  }
+
+  // Init: preload the base avatar so we know the reference resolution + set canvas size.
+  async function initBaseAvatar() {
+    const img = await getImage('assets/avatar-base.png');
+    baseSourceImg = img;
+    charBase.width = img.naturalWidth;
+    charBase.height = img.naturalHeight;
+  }
+
+  // Given an ImageData buffer, classify each pixel + compute per-class avg L.
+  function analyzeImageData(imgData) {
+    const data = imgData.data;
+    const classes = new Uint8Array(data.length / 4);
+    const lightSum = [0,0,0,0,0]; const lightCount = [0,0,0,0,0];
+    for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+      const c = classifyPixel(data[i], data[i+1], data[i+2], data[i+3]);
+      classes[p] = c;
+      if (c > 0) {
+        const l = (Math.max(data[i], data[i+1], data[i+2]) + Math.min(data[i], data[i+1], data[i+2])) / (2 * 255);
+        lightSum[c] += l; lightCount[c]++;
+      }
+    }
+    return {
+      classes,
+      avgL: {
+        1: lightCount[1] ? lightSum[1]/lightCount[1] : 0.6,
+        2: lightCount[2] ? lightSum[2]/lightCount[2] : 0.15,
+        3: lightCount[3] ? lightSum[3]/lightCount[3] : 0.72,
+        4: lightCount[4] ? lightSum[4]/lightCount[4] : 0.45,
+      },
+    };
+  }
+
+  // Take an ImageData + a class map + a per-class avgL, and write a recolored
+  // ImageData into `dstData` (a Uint8ClampedArray of the same length).
+  function recolorImageData(srcData, classes, avgL, dstData) {
+    const src = srcData;
+    const targets = {};
+    for (const part of ['beanie','hair','skin','eyes']) {
+      const idx = state.colors[part] || 0;
+      const swatch = COLORS[part][idx];
+      const isDefault = idx === 0;
+      const [tr, tg, tb] = hexToRgb(swatch.hex);
+      const [th, ts] = rgbToHsl(tr, tg, tb);
+      const [, , tl0] = rgbToHsl(tr, tg, tb);
+      targets[part] = { isDefault, h: th, s: ts, tl0 };
+    }
+    const partByClass = { 1: 'beanie', 2: 'hair', 3: 'skin', 4: 'eyes' };
+    for (let i = 0, p = 0; i < src.length; i += 4, p++) {
+      const cls = classes[p];
+      dstData[i+3] = src[i+3];
+      if (cls === 0) {
+        dstData[i] = src[i]; dstData[i+1] = src[i+1]; dstData[i+2] = src[i+2];
+        continue;
+      }
+      const part = partByClass[cls];
+      const tgt = targets[part];
+      if (tgt.isDefault) {
+        dstData[i] = src[i]; dstData[i+1] = src[i+1]; dstData[i+2] = src[i+2];
+        continue;
+      }
+      const [, , sl] = rgbToHsl(src[i], src[i+1], src[i+2]);
+      const delta = sl - avgL[cls];
+      let nl = tgt.tl0 + delta;
+      nl = Math.max(0, Math.min(1, nl));
+      const [nr, ng, nb] = hslToRgb(tgt.h, tgt.s, nl);
+      dstData[i] = nr; dstData[i+1] = ng; dstData[i+2] = nb;
+    }
+  }
+
+  // Render the currently-selected outfit into #charBase, recoloring in place.
+  // Handles both "combo PNG" and "base + separate top/bottom" cases.
+  async function renderRecoloredOutfit() {
+    const topItem    = TOPS[state.selected.tops]       || TOPS[0];
+    const bottomItem = BOTTOMS[state.selected.bottoms] || BOTTOMS[0];
+    const comboImg   = COMBOS[`${topItem.id}:${bottomItem.id}`];
+
+    // Build the raw (pre-recolor) source into an offscreen canvas at the
+    // avatar base resolution.
+    const w = baseSourceImg ? baseSourceImg.naturalWidth  : 1024;
+    const h = baseSourceImg ? baseSourceImg.naturalHeight : 1024;
+    const off = document.createElement('canvas');
+    off.width = w; off.height = h;
+    const octx = off.getContext('2d');
+
+    try {
+      if (comboImg) {
+        // Combo art is a full-body image at ~same aspect; draw contain-fit
+        const img = await getImage(comboImg);
+        const scale = Math.min(w / img.naturalWidth, h / img.naturalHeight);
+        const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
+        octx.drawImage(img, (w - dw) / 2, h - dh, dw, dh);
+      } else {
+        // Base + optional bottom + optional top, stacked
+        if (baseSourceImg) octx.drawImage(baseSourceImg, 0, 0, w, h);
+        if (bottomItem.id !== 'none' && bottomItem.img) {
+          const img = await getImage(bottomItem.img);
+          octx.drawImage(img, 0, 0, w, h);
+        }
+        if (topItem.id !== 'none' && topItem.img) {
+          const img = await getImage(topItem.img);
+          octx.drawImage(img, 0, 0, w, h);
+        }
+      }
+    } catch (e) {
+      console.error('outfit compose failed', e);
+    }
+
+    // Try to read pixels for recoloring. If the offscreen canvas is tainted
+    // (image loaded without CORS), getImageData throws — in that case just
+    // blit the raw composite so the avatar at least appears.
+    charBase.width = w; charBase.height = h;
+    const ctx = charBase.getContext('2d');
+    ctx.clearRect(0, 0, w, h);
+    try {
+      const srcData = octx.getImageData(0, 0, w, h);
+      const { classes, avgL } = analyzeImageData(srcData);
+      const outData = new ImageData(w, h);
+      recolorImageData(srcData.data, classes, avgL, outData.data);
+      ctx.putImageData(outData, 0, 0);
+    } catch (e) {
+      console.warn('recolor unavailable (canvas tainted), showing raw', e);
+      ctx.drawImage(off, 0, 0);
+    }
+  }
+
+  function renderBackground() {
+    const bg = BACKGROUNDS[state.selected.backgrounds] || BACKGROUNDS[0];
+    if (bg.id === 'none' || !bg.img) {
+      canvasBg.style.display = 'none';
+      canvasBg.removeAttribute('src');
+    } else {
+      canvasBg.src = bg.img;
+      canvasBg.style.display = '';
+    }
+  }
+
+  function imgHTML(src) {
+    // loading="lazy" + decoding="async" keeps the browser from choking when many PNGs exist
+    return `<img class="garment-img" src="${src}" alt="" loading="lazy" decoding="async">`;
+  }
+
+  function renderCharacter() {
+    // Everything (base + clothes OR combo) is composited into #charBase and
+    // recolored in one pass, so it's always up to date with color choices.
+    layerCombo.innerHTML   = '';
+    layerBottoms.innerHTML = '';
+    layerTop.innerHTML     = '';
+    charBase.style.visibility = 'visible';
+    renderRecoloredOutfit();
+  }
+
+  function tilePreviewHTML(item, cat) {
+    if (item.id === 'none') {
+      return `<div class="none-dash"></div>`;
+    }
+    // Background tiles are just the background image itself — no character overlay
+    if (cat === 'backgrounds') {
+      return `<img class="thumb" src="${item.img}" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;object-position:center;">`;
+    }
+    return `
+      <div class="preview-stack">
+        <img class="thumb" src="assets/avatar-base.png" alt="" loading="lazy" decoding="async">
+        ${item.img ? imgHTML(item.img) : ''}
+      </div>
+    `;
+  }
+
+  function renderWardrobe() {
+    const cat = state.category;
+    wardrobeCategoryEl.textContent = cat;
+    gridEl.innerHTML = '';
+
+    if (cat === 'colors') {
+      // Custom UI: swatch rows for beanie / hair / skin / eyes
+      const container = document.createElement('div');
+      container.className = 'color-section';
+      const PARTS = [
+        { key: 'beanie', label: 'Beanie' },
+        { key: 'hair',   label: 'Hair'   },
+        { key: 'skin',   label: 'Skin'   },
+        { key: 'eyes',   label: 'Eyes'   },
+      ];
+      PARTS.forEach(part => {
+        const row = document.createElement('div');
+        row.className = 'color-row';
+        const label = document.createElement('div');
+        label.className = 'color-row-label';
+        label.textContent = part.label;
+        row.appendChild(label);
+
+        const swatches = document.createElement('div');
+        swatches.className = 'swatches';
+        COLORS[part.key].forEach((c, idx) => {
+          const sw = document.createElement('div');
+          sw.className = 'swatch' + (state.colors[part.key] === idx ? ' selected' : '');
+          sw.style.background = c.hex;
+          sw.title = c.label || c.id;
+          sw.addEventListener('click', () => {
+            state.colors[part.key] = idx;
+            persist();
+            renderWardrobe();
+            renderCharacter();
+          });
+          swatches.appendChild(sw);
+        });
+        row.appendChild(swatches);
+        container.appendChild(row);
+      });
+      gridEl.appendChild(container);
+      return;
+    }
+
+    const items = CATS[cat];
+    items.forEach((item, idx) => {
+      const tile = document.createElement('div');
+      tile.className = 'tile' + (state.selected[cat] === idx ? ' selected' : '');
+      tile.innerHTML = tilePreviewHTML(item, cat);
+      tile.addEventListener('click', () => {
+        state.selected[cat] = idx;
+        persist();
+        renderWardrobe();
+        renderCharacter();
+        renderBackground();
+      });
+      gridEl.appendChild(tile);
+    });
+  }
+
+  // --- Tabs ---
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      if (tab.classList.contains('disabled')) return;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      state.category = tab.dataset.cat;
+      persist();
+      renderWardrobe();
+    });
+  });
+  // Restore active tab from state
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.cat === state.category);
+  });
+
+  // --- Action buttons ---
+  document.getElementById('btnRandomize').addEventListener('click', () => {
+    // Skip index 0 ("None") so randomize always picks real clothes
+    for (const cat of ['tops', 'bottoms']) {
+      const len = CATS[cat].length;
+      state.selected[cat] = 1 + Math.floor(Math.random() * (len - 1));
+    }
+    persist();
+    renderWardrobe();
+    renderCharacter();
+  });
+  document.getElementById('btnReset').addEventListener('click', () => {
+    state.selected = { tops: 0, bottoms: 0, backgrounds: 0 };
+    state.colors = { beanie: 0, hair: 0, skin: 0, eyes: 0 };
+    persist();
+    renderWardrobe();
+    renderCharacter();
+    renderBackground();
+  });
+
+  // --- Save Avatar: composite everything into a PNG and trigger download ---
+  async function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
+  async function exportAvatarPNG() {
+    const SIZE = 1024;
+    const canvas = document.createElement('canvas');
+    canvas.width = SIZE; canvas.height = SIZE;
+    const ctx = canvas.getContext('2d');
+
+    // 1. Background
+    const bg = BACKGROUNDS[state.selected.backgrounds] || BACKGROUNDS[0];
+    if (bg.id !== 'none' && bg.img) {
+      try {
+        const bgImg = await loadImage(bg.img);
+        const scale = Math.max(SIZE / bgImg.width, SIZE / bgImg.height);
+        const w = bgImg.width * scale, h = bgImg.height * scale;
+        ctx.drawImage(bgImg, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
+      } catch (e) { ctx.fillStyle = '#f4ecd8'; ctx.fillRect(0,0,SIZE,SIZE); }
+    } else {
+      ctx.fillStyle = '#f4ecd8';
+      ctx.fillRect(0, 0, SIZE, SIZE);
+    }
+
+    // 2. Character
+    const padX = SIZE * 0.08;
+    const padTop = SIZE * 0.06;
+    const padBot = SIZE * 0.04;
+    const boxW = SIZE - padX * 2;
+    const boxH = SIZE - padTop - padBot;
+
+    // Draw the character contain-fit + bottom-aligned, with a clean outline.
+    // The outline is generated by:
+    //   1. Drawing the source into an offscreen canvas at export scale
+    //   2. Making a silhouette-mask canvas (all opaque pixels → black)
+    //   3. Stamping that mask at 8 offset positions to grow it 2px on all sides
+    //   4. Blitting the growmask + the original image on top
+    // This produces a crisp uniform stroke — much better than layered
+    // drop-shadows which multiply on antialiased edges.
+    function drawWithOutline(source) {
+      const iw = source.width || source.naturalWidth;
+      const ih = source.height || source.naturalHeight;
+      const scale = Math.min(boxW / iw, boxH / ih);
+      const w = iw * scale, h = ih * scale;
+      const x = (SIZE - w) / 2;
+      const y = padTop + boxH - h;
+
+      const STROKE = 3; // pixels of outline at export resolution
+
+      // 1. Rasterize the source at final size (so subsequent alpha reads are accurate)
+      const charCanvas = document.createElement('canvas');
+      charCanvas.width = Math.ceil(w) + STROKE * 4;
+      charCanvas.height = Math.ceil(h) + STROKE * 4;
+      const cctx = charCanvas.getContext('2d');
+      const inset = STROKE * 2;
+      cctx.drawImage(source, inset, inset, w, h);
+
+      // 2. Build the black-silhouette mask on a parallel canvas
+      const maskCanvas = document.createElement('canvas');
+      maskCanvas.width  = charCanvas.width;
+      maskCanvas.height = charCanvas.height;
+      const mctx = maskCanvas.getContext('2d');
+      mctx.drawImage(charCanvas, 0, 0);
+      // Turn every opaque pixel black, keep alpha
+      mctx.globalCompositeOperation = 'source-in';
+      mctx.fillStyle = '#000';
+      mctx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+
+      // 3. Stamp the mask into a "grown mask" canvas at 8 offsets
+      const grown = document.createElement('canvas');
+      grown.width = charCanvas.width;
+      grown.height = charCanvas.height;
+      const gctx = grown.getContext('2d');
+      const step = STROKE;
+      for (let dx = -step; dx <= step; dx++) {
+        for (let dy = -step; dy <= step; dy++) {
+          if (dx*dx + dy*dy > step*step) continue; // circular grow
+          gctx.drawImage(maskCanvas, dx, dy);
+        }
+      }
+
+      // 4. Blit outline + character onto the main canvas
+      ctx.drawImage(grown,      x - inset, y - inset);
+      ctx.drawImage(charCanvas, x - inset, y - inset);
+    }
+
+    // The visible #charBase canvas already contains the fully-composited,
+    // recolored outfit — just draw it.
+    try {
+      drawWithOutline(charBase);
+    } catch (e) { console.error('character draw failed', e); }
+
+    // 3. Watermark
+    ctx.font = 'bold 22px Arial, Helvetica, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    const wmText = 'www.uptownbaby.net';
+    const wmY = SIZE - 18;
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#1a0a04';
+    ctx.strokeText(wmText, SIZE / 2, wmY);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(wmText, SIZE / 2, wmY);
+
+    return canvas;
+  }
+
+  // Convert exported canvas → { dataUrl, blob, file }
+  async function buildExportPayload() {
+    const canvas = await exportAvatarPNG();
+    const dataUrl = canvas.toDataURL('image/png');
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    const file = new File([blob], 'ksuuvi-avatar.png', { type: 'image/png' });
+    return { dataUrl, blob, file };
+  }
+
+  function downloadDataUrl(dataUrl, filename) {
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  // --- Toast ---
+  const toastEl = document.getElementById('toast');
+  let toastTimer = null;
+  function showToast(msg, duration = 2200) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
+  }
+
+  // --- Modal ---
+  const modalEl = document.getElementById('shareModal');
+  function openModal() { modalEl.classList.add('open'); }
+  function closeModal() { modalEl.classList.remove('open'); }
+  modalEl.addEventListener('click', (e) => { if (e.target === modalEl) closeModal(); });
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('modalOpenIG').addEventListener('click', () => {
+    // Try to open the Instagram app; on desktop this just tries the site
+    window.open('https://www.instagram.com/', '_blank');
+    closeModal();
+  });
+
+  // Utility: flash button feedback
+  function flashBtn(btn, text, ok = true) {
+    const orig = btn.dataset.origHtml || btn.innerHTML;
+    btn.dataset.origHtml = orig;
+    btn.innerHTML = text;
+    if (ok) btn.style.filter = 'brightness(1.15) saturate(1.1)';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.filter = ''; }, 1400);
+  }
+
+  // --- Save Image ---
+  document.getElementById('btnSave').addEventListener('click', async () => {
+    const btn = document.getElementById('btnSave');
+    btn.disabled = true;
+    try {
+      const { dataUrl } = await buildExportPayload();
+      downloadDataUrl(dataUrl, 'ksuuvi-avatar.png');
+      flashBtn(btn, '✓ Saved!');
+    } catch (e) {
+      console.error(e);
+      flashBtn(btn, '✗ Failed', false);
+    }
+    setTimeout(() => { btn.disabled = false; }, 1400);
+  });
+
+  // --- Share to Instagram ---
+  // IG has no direct web share intent for images. Best flow:
+  //  1. Try native Web Share API with the image file (mobile — lets user pick IG)
+  //  2. Fallback: download the image + open a modal explaining next steps
+  document.getElementById('btnShareIG').addEventListener('click', async () => {
+    const btn = document.getElementById('btnShareIG');
+    btn.disabled = true;
+    try {
+      const { dataUrl, file } = await buildExportPayload();
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'My Ksuuvi',
+            text: 'Built my Ksuuvi at www.uptownbaby.net',
+          });
+          flashBtn(btn, '✓ Shared!');
+        } catch (err) {
+          // User canceled — no fallback needed
+          if (err.name !== 'AbortError') {
+            console.error(err);
+            downloadDataUrl(dataUrl, 'ksuuvi-avatar.png');
+            openModal();
+          }
+        }
+      } else {
+        // Desktop / unsupported: download + open modal with instructions
+        downloadDataUrl(dataUrl, 'ksuuvi-avatar.png');
+        openModal();
+      }
+    } catch (e) {
+      console.error(e);
+      flashBtn(btn, '✗ Failed', false);
+    }
+    setTimeout(() => { btn.disabled = false; }, 1400);
+  });
+
+  // --- Share to X ---
+  // X supports the intent URL for text + link, but not image upload.
+  // Best flow: download the image, then open the tweet composer with pre-filled text.
+  document.getElementById('btnShareX').addEventListener('click', async () => {
+    const btn = document.getElementById('btnShareX');
+    btn.disabled = true;
+    try {
+      const { dataUrl } = await buildExportPayload();
+      downloadDataUrl(dataUrl, 'ksuuvi-avatar.png');
+      const text = encodeURIComponent('Built my Ksuuvi 🧢 at www.uptownbaby.net');
+      const url  = encodeURIComponent('https://www.uptownbaby.net');
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+      showToast('Image saved — attach it in your tweet!');
+    } catch (e) {
+      console.error(e);
+      flashBtn(btn, '✗ Failed', false);
+    }
+    setTimeout(() => { btn.disabled = false; }, 1400);
+  });
+
+  // Initial paint: load the base avatar, then render everything.
+  // renderCharacter() → renderRecoloredOutfit() is async, so we await it
+  // here to guarantee the canvas actually paints before the IIFE resolves.
+  (async () => {
+    try {
+      await initBaseAvatar();
+    } catch (e) { console.error('base avatar init failed', e); }
+    try {
+      renderWardrobe();
+      renderBackground();
+      await renderRecoloredOutfit();
+    } catch (e) { console.error('initial render failed', e); }
+  })();
+</script>
+
+</body>
+</html>
