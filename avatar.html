@@ -1,0 +1,1711 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>KSUUVI — Avatar Creator</title>
+<link rel="icon" type="image/png" href="assets/avatar-button.png?v=2">
+<link rel="apple-touch-icon" href="assets/avatar-button.png?v=2">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; overflow-x: hidden; max-width: 100%; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 100%),
+      url("assets/brick-wall.jpg");
+    background-size: 100% 100%, 560px auto;
+    background-repeat: no-repeat, repeat;
+    background-position: top, top left;
+    background-attachment: fixed, scroll;
+    background-color: #6a3220;
+    min-height: 100vh;
+    padding: 14px 0 44px;
+    image-rendering: -webkit-optimize-contrast;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* ============ Storefront sign (same as homepage) ============ */
+  .topbar-wrap {
+    margin: 0 auto 12px;
+    position: relative;
+    z-index: 5;
+    width: max-content;
+    max-width: 96vw;
+    filter: drop-shadow(0 6px 0 rgba(0,0,0,0.55)) drop-shadow(0 14px 22px rgba(0,0,0,0.5));
+  }
+  .topbar-wrap img.sign-bg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .topbar {
+    position: relative; z-index: 1;
+    padding: 14px 28px;
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+  }
+  .topbar .brand { flex-shrink: 0; line-height: 0; transform: rotate(-1.5deg); filter: drop-shadow(0 3px 0 rgba(0,0,0,0.35)); }
+  .topbar .brand img { display: block; height: 80px; width: auto; }
+  .topbar .avatar-star {
+    line-height: 0; flex-shrink: 0;
+    position: relative;
+    display: inline-block;
+    transform: rotate(6deg);
+    transition: transform 0.15s ease, filter 0.15s ease;
+    cursor: pointer;
+    filter: drop-shadow(2px 4px 0 rgba(0,0,0,0.45)) drop-shadow(0 6px 10px rgba(0,0,0,0.4));
+    animation: starwobble 3s ease-in-out infinite;
+  }
+  .topbar .avatar-star:hover {
+    transform: rotate(0deg) scale(1.1);
+    filter: drop-shadow(2px 5px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 14px rgba(0,0,0,0.5)) brightness(1.05);
+    animation: none;
+  }
+  .topbar .avatar-star:active { transform: rotate(0deg) scale(1.04); }
+  @keyframes starwobble {
+    0%, 100% { transform: rotate(6deg); }
+    50% { transform: rotate(10deg) translateY(-3px); }
+  }
+  .topbar .avatar-star img.face { display: block; height: 92px; width: auto; }
+  .goback-bubble {
+    position: absolute;
+    top: -10px;
+    right: -22px;
+    background: linear-gradient(180deg, #ffe066 0%, #ffb820 60%, #c97604 100%);
+    border: 2px solid #1a0a04;
+    color: #1a0a04;
+    font-family: "Comic Sans MS", "Marker Felt", Impact, "Arial Black", sans-serif;
+    font-weight: 900;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    padding: 4px 9px 4px;
+    border-radius: 14px;
+    box-shadow:
+      0 2px 0 #1a0a04,
+      0 4px 8px rgba(0,0,0,0.45),
+      inset 0 2px 0 rgba(255,255,255,0.55);
+    white-space: nowrap;
+    transform: rotate(-6deg);
+    pointer-events: none;
+    z-index: 2;
+  }
+  @media (min-width: 520px) {
+    .topbar .brand img { height: 110px; }
+    .topbar .avatar-star img.face { height: 130px; }
+    .topbar { gap: 22px; padding: 18px 36px; }
+    .goback-bubble { font-size: 17px; padding: 7px 14px 8px; top: -14px; right: -30px; border-radius: 22px; }
+  }
+
+  /* ============ Storefront (pelmet + shutter) ============ */
+  .storefront { max-width: 760px; margin: 0 auto; position: relative; }
+
+  .pelmet-box {
+    position: relative;
+    z-index: 5;
+    width: min(742px, 100vw);
+    margin: 0 auto -8px;
+    filter: drop-shadow(0 12px 16px rgba(0,0,0,0.55));
+  }
+  .pelmet-top {
+    height: 14px;
+    background: linear-gradient(180deg, #4a3018 0%, #6e4a26 40%, #5a3a1c 70%, #2a1808 100%);
+    border-top: 2px solid #1a0a04;
+    border-left: 2px solid #1a0a04;
+    border-right: 2px solid #1a0a04;
+    border-radius: 6px 6px 0 0;
+    box-shadow: inset 0 2px 0 rgba(255,200,140,0.18), inset 0 -3px 6px rgba(0,0,0,0.5);
+    position: relative;
+  }
+  .pelmet-top::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -3px;
+    height: 3px; background: linear-gradient(180deg, #0a0604, #1a0a04);
+  }
+  .pelmet-face {
+    position: relative;
+    background:
+      radial-gradient(ellipse at 50% 50%, transparent 35%, rgba(0,0,0,0.45) 100%),
+      url("assets/rust-texture.jpg");
+    background-size: 100% 100%, cover;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+    background-blend-mode: multiply, normal;
+    border-left: 3px solid #1a0a04;
+    border-right: 3px solid #1a0a04;
+    padding: 10px 16px 12px;
+    box-shadow:
+      inset 0 2px 0 rgba(255,210,160,0.25),
+      inset 0 -4px 10px rgba(0,0,0,0.55),
+      inset 3px 0 8px rgba(0,0,0,0.4),
+      inset -3px 0 8px rgba(0,0,0,0.4);
+    text-align: center;
+    min-height: 32px;
+  }
+  .pelmet-face::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(180deg,
+      rgba(0,0,0,0) 0px, rgba(0,0,0,0.08) 3px,
+      rgba(0,0,0,0) 7px, rgba(255,255,255,0.03) 14px, rgba(0,0,0,0) 22px);
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+  .pelmet-bottom {
+    height: 16px;
+    background: linear-gradient(180deg, #2a1808 0%, #1a0a04 50%, #0a0402 100%);
+    border-bottom: 2px solid #050201;
+    border-left: 2px solid #1a0a04;
+    border-right: 2px solid #1a0a04;
+    border-radius: 0 0 4px 4px;
+    box-shadow:
+      inset 0 2px 4px rgba(0,0,0,0.7),
+      inset 0 -1px 0 rgba(80,40,18,0.3),
+      0 4px 8px rgba(0,0,0,0.5);
+  }
+
+  /* Corrugated shutter */
+  .spine {
+    position: relative;
+    margin: 0 auto;
+    width: min(720px, 96vw);
+    background:
+      radial-gradient(ellipse at 12% 8%, rgba(0,0,0,0.22) 0%, transparent 30%),
+      radial-gradient(ellipse at 88% 18%, rgba(0,0,0,0.18) 0%, transparent 35%),
+      radial-gradient(ellipse at 30% 70%, rgba(0,0,0,0.15) 0%, transparent 40%),
+      radial-gradient(ellipse at 75% 85%, rgba(0,0,0,0.20) 0%, transparent 35%),
+      repeating-linear-gradient(180deg,
+        #4a4a4a 0px, #c0c0c0 1px, #d8d8d8 3px, #9c9c9c 5px, #383838 6px, #4a4a4a 7px),
+      linear-gradient(90deg, #4a4a4a 0%, #787878 8%, #a4a4a4 30%, #b4b4b4 50%, #a4a4a4 70%, #787878 92%, #4a4a4a 100%);
+    background-blend-mode: multiply, multiply, multiply, multiply, normal, normal;
+    border-left: 14px solid #1d2a26;
+    border-right: 14px solid #1d2a26;
+    box-shadow:
+      0 0 0 3px #0a110f,
+      inset 14px 0 22px -10px rgba(0,0,0,0.6),
+      inset -14px 0 22px -10px rgba(0,0,0,0.6),
+      0 18px 36px rgba(0,0,0,0.65);
+    padding: 18px 22px 28px;
+  }
+
+  /* ============ Creator content ============ */
+  .creator-title {
+    font-family: Impact, "Arial Black", sans-serif;
+    color: #fff8e0;
+    text-align: center;
+    font-size: clamp(20px, 4.2vw, 28px);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    text-shadow: 3px 3px 0 #2a0a04, 0 4px 10px rgba(0,0,0,0.6);
+    margin: 0 0 14px;
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+  }
+  .creator-title .star {
+    color: #ffb820;
+    font-size: 0.85em;
+    text-shadow: 2px 2px 0 #2a0a04;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+  }
+
+  /* Character canvas */
+  .canvas-frame {
+    position: relative;
+    width: min(420px, 92%);
+    margin: 0 auto;
+    aspect-ratio: 1 / 1;
+    background: #f4ecd8;
+    border: 3px solid #1a0a04;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow:
+      0 6px 0 #1a0a04,
+      0 10px 20px rgba(0,0,0,0.55),
+      inset 0 0 0 2px rgba(255,255,255,0.35),
+      inset 0 0 60px rgba(160,120,60,0.18);
+  }
+  /* Selected background sits behind everything in the canvas */
+  .canvas-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+  }
+  /* Accessory sits BEHIND the character but on top of the background */
+  .canvas-accessory {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    pointer-events: none;
+    user-select: none;
+    z-index: 1;
+  }
+  /* URL watermark stamped inside the canvas so it's baked into exports */
+  .canvas-watermark {
+    position: absolute;
+    left: 50%;
+    bottom: 6px;
+    transform: translateX(-50%);
+    z-index: 5;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 900;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: #fff;
+    text-shadow:
+      1px 1px 0 #1a0a04,
+     -1px 1px 0 #1a0a04,
+      1px -1px 0 #1a0a04,
+     -1px -1px 0 #1a0a04,
+      0 2px 3px rgba(0,0,0,0.6);
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .canvas-frame .corner-star {
+    position: absolute;
+    width: 22px; height: 22px;
+    color: #d64a2a;
+    font-size: 22px;
+    line-height: 1;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,0.3));
+    pointer-events: none;
+    user-select: none;
+  }
+  .canvas-frame .corner-star.tl { top: 10px; left: 12px; transform: rotate(-8deg); }
+  .canvas-frame .corner-star.br { bottom: 10px; right: 12px; transform: rotate(12deg); }
+
+  /* Name tag stamped over the beanie — same storefront-sign style as the header */
+  .name-tag {
+    position: absolute;
+    top: 14%;
+    left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+    z-index: 4;
+    background: #1a0a04;
+    padding: 4px 12px 5px;
+    border: 2px solid #1a0a04;
+    border-radius: 3px;
+    box-shadow:
+      0 2px 0 rgba(0,0,0,0.55),
+      0 4px 8px rgba(0,0,0,0.45);
+    max-width: 62%;
+    pointer-events: auto;
+  }
+  .name-tag::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    background: linear-gradient(180deg, var(--tag-top, #d64a2a) 0%, var(--tag-bot, #a02818) 100%);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+
+  /* Name tag color picker row */
+  .name-tag-colors {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 12px auto 0;
+    width: min(420px, 92%);
+    padding: 8px 12px;
+    background: rgba(0,0,0,0.35);
+    border: 2px solid #1a0a04;
+    border-radius: 6px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.4);
+  }
+  .name-tag-colors .label {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 900;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: #f0e0c8;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+    margin-right: 4px;
+  }
+  .tag-swatch {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid #1a0a04;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.5), inset 0 -3px 0 rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: transform 120ms ease;
+  }
+  .tag-swatch:hover { transform: translateY(-1px); }
+  .tag-swatch.selected {
+    outline: 3px solid #ffcf3a;
+    outline-offset: 2px;
+  }
+  /* Show-tag toggle: retro chunky switch to match the storefront vibe */
+  .tag-toggle {
+    display: inline-flex; align-items: center; gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 900;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: #f0e0c8;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+  }
+  .tag-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+  .tag-toggle .track {
+    position: relative;
+    width: 42px; height: 22px;
+    background: #2a1608;
+    border: 2px solid #1a0a04;
+    border-radius: 22px;
+    box-shadow: inset 0 2px 0 rgba(0,0,0,0.5), 0 2px 0 rgba(0,0,0,0.4);
+    transition: background 160ms ease;
+  }
+  .tag-toggle .track::after {
+    content: '';
+    position: absolute; top: 1px; left: 1px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #f6e0a8 0%, #d19434 100%);
+    border: 2px solid #1a0a04;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+    transition: transform 160ms ease;
+  }
+  .tag-toggle input:checked + .track {
+    background: linear-gradient(180deg, #3ea54a 0%, #1f6a2a 100%);
+  }
+  .tag-toggle input:checked + .track::after {
+    transform: translateX(20px);
+  }
+  .tag-toggle:hover .track::after { filter: brightness(1.08); }
+  .name-tag.hidden { display: none; }
+  .name-tag-input {
+    position: relative;
+    z-index: 1;
+    display: block;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    width: 100%;
+    min-width: 90px;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 900;
+    font-style: italic;
+    font-size: clamp(11px, 2.2vw, 16px);
+    letter-spacing: 0.08em;
+    color: #fff;
+    text-transform: uppercase;
+    text-shadow:
+      1px 1px 0 #1a0a04,
+     -1px 1px 0 #1a0a04,
+      1px -1px 0 #1a0a04,
+     -1px -1px 0 #1a0a04,
+      0 2px 3px rgba(0,0,0,0.5);
+    caret-color: #fff;
+  }
+  .name-tag-input::placeholder { color: rgba(255,255,255,0.55); font-style: italic; }
+  .name-tag-input:focus { outline: 0; }
+
+  .character-stack {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 6% 8% 4%;
+    z-index: 2;
+  }
+  .character-stack img,
+  .character-stack canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: bottom center;
+    image-rendering: -webkit-optimize-contrast;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  /* Canvas needs display:block + contain-fit like the img */
+  .character-stack canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  /* Color-swatch strip inside the wardrobe */
+  .color-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px 4px 10px;
+  }
+  .color-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .color-row-label {
+    width: 62px;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 12px;
+    color: #f4ecd8;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+  }
+  .swatches {
+    display: flex;
+    flex: 1;
+    gap: 5px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .swatches::-webkit-scrollbar { height: 4px; }
+  .swatches::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.3); border-radius: 2px; }
+  .swatch {
+    width: 22px; height: 22px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid #1a0a04;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: transform 0.1s ease;
+    position: relative;
+  }
+  .swatch:hover { transform: translateY(-1px) scale(1.06); }
+  .swatch.selected {
+    box-shadow: 0 0 0 3px #ffc04a, 0 2px 0 rgba(0,0,0,0.5);
+  }
+  /* Layered clothing sits on top of the base */
+  .character-stack .layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 6% 8% 4%; /* match .character-stack padding */
+    pointer-events: none;
+  }
+  .character-stack .layer .garment-img,
+  .tile .preview-stack .garment-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: bottom center;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  /* Inside a tile the garment PNG sits exactly on top of the thumb base */
+  .tile .preview-stack .garment-img {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Action row */
+  .action-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 18px auto 14px;
+    flex-wrap: wrap;
+  }
+  .action-btn {
+    appearance: none;
+    background: linear-gradient(180deg, #fff8e0 0%, #f4dfa8 55%, #d8b46a 100%);
+    border: 2px solid #1a0a04;
+    color: #1a0a04;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 14px 8px 12px;
+    border-radius: 4px;
+    box-shadow: 0 3px 0 #1a0a04, inset 0 2px 0 rgba(255,255,255,0.7);
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: transform 0.06s ease, box-shadow 0.06s ease;
+  }
+  .action-btn .star { color: #d97a10; text-shadow: 1px 1px 0 rgba(0,0,0,0.35); }
+  .action-btn:hover { filter: brightness(1.03); }
+  .action-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #1a0a04, inset 0 2px 0 rgba(255,255,255,0.7); }
+
+  /* Share row: same button chrome, tinted variants */
+  .share-row { margin-top: 4px; }
+  .share-btn .share-icon { flex-shrink: 0; margin-right: 2px; }
+  .share-btn.share-ig {
+    background: linear-gradient(135deg, #feda75 0%, #fa7e1e 25%, #d62976 55%, #962fbf 80%, #4f5bd5 100%);
+    color: #fff;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.35);
+  }
+  .share-btn.share-x {
+    background: linear-gradient(180deg, #2a2a2a 0%, #0a0a0a 100%);
+    color: #fff;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.35);
+  }
+
+  /* Share modal (appears after IG click since IG has no web share intent) */
+  .share-modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(20, 10, 4, 0.65);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .share-modal-backdrop.open { display: flex; }
+  .share-modal {
+    background: #fff8e0;
+    border: 3px solid #1a0a04;
+    border-radius: 6px;
+    box-shadow: 0 8px 0 #1a0a04, 0 14px 30px rgba(0,0,0,0.5);
+    padding: 20px 22px 18px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #1a0a04;
+  }
+  .share-modal h2 {
+    margin: 0 0 10px;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+  }
+  .share-modal p {
+    margin: 0 0 14px;
+    font-size: 13.5px;
+    line-height: 1.45;
+  }
+  .share-modal ol {
+    text-align: left;
+    margin: 0 0 14px 22px;
+    padding: 0;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  .share-modal .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .share-modal .modal-btn {
+    appearance: none;
+    padding: 8px 14px;
+    border: 2px solid #1a0a04;
+    border-radius: 4px;
+    background: #f4dfa8;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 2px 0 #1a0a04;
+  }
+  .share-modal .modal-btn.primary {
+    background: linear-gradient(135deg, #feda75 0%, #fa7e1e 25%, #d62976 55%, #962fbf 80%, #4f5bd5 100%);
+    color: #fff;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.35);
+  }
+  .share-modal .modal-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #1a0a04; }
+
+  /* Toast for quick feedback */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    background: #1a0a04;
+    color: #fff8e0;
+    padding: 10px 16px;
+    border-radius: 4px;
+    border: 2px solid #ffc04a;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+
+  /* Category tabs */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin: 6px auto 0;
+    background: linear-gradient(180deg, #2a1808, #1a0a04);
+    border: 2px solid #1a0a04;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    padding: 6px 6px 0;
+    width: fit-content;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+  .tab {
+    appearance: none;
+    background: linear-gradient(180deg, #6a4a2a 0%, #4a2e14 100%);
+    border: 2px solid #1a0a04;
+    border-bottom: none;
+    color: #d8c8a0;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    border-radius: 5px 5px 0 0;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,220,170,0.2);
+    transition: filter 0.12s ease, transform 0.06s ease;
+    margin-right: 2px;
+    position: relative;
+    top: 2px;
+  }
+  .tab:hover:not(.disabled) { filter: brightness(1.1); }
+  .tab.active {
+    background: linear-gradient(180deg, #ffe28a 0%, #e8b048 55%, #b87418 100%);
+    color: #1a0a04;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.35);
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.6), 0 -2px 6px rgba(0,0,0,0.3);
+    top: 0;
+    padding: 10px 14px;
+    z-index: 2;
+  }
+  .tab.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(0.4);
+  }
+
+  /* Wardrobe panel */
+  .wardrobe {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255,220,170,0.08) 0%, transparent 60%),
+      linear-gradient(180deg, #5a3a1c 0%, #3e2810 100%);
+    border: 3px solid #1a0a04;
+    border-radius: 0 0 6px 6px;
+    padding: 14px 14px 18px;
+    box-shadow: inset 0 2px 0 rgba(255,210,160,0.15), inset 0 -4px 10px rgba(0,0,0,0.4);
+    margin: 0 auto;
+  }
+  .wardrobe-title {
+    text-align: center;
+    font-family: Impact, "Arial Black", sans-serif;
+    color: #fff8e0;
+    font-size: 14px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 0 #1a0a04;
+    margin: 2px 0 12px;
+  }
+  .wardrobe-title .accent { color: #ffb820; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  @media (max-width: 520px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .tile {
+    position: relative;
+    background: #f4ecd8;
+    border: 2px solid #1a0a04;
+    border-radius: 4px;
+    aspect-ratio: 1 / 1;
+    cursor: pointer;
+    overflow: hidden;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  .tile:hover { transform: translateY(-1px); box-shadow: 0 3px 0 rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3); }
+  .tile.selected {
+    border-color: #b87418;
+    box-shadow: 0 0 0 3px #ffc04a, 0 2px 0 rgba(0,0,0,0.5);
+    background: #fff8e0;
+  }
+  .tile .idx {
+    position: absolute;
+    top: 3px; left: 5px;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 10px;
+    color: #7a5a2a;
+    letter-spacing: 0.02em;
+  }
+  .tile .label {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    background: rgba(20,10,4,0.78);
+    color: #fff8e0;
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-align: center;
+    padding: 3px 4px;
+    text-transform: uppercase;
+  }
+  .tile .thumb {
+    width: 82%;
+    height: 82%;
+    object-fit: contain;
+    object-position: bottom center;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .tile .none-dash {
+    width: 22px; height: 3px;
+    background: #1a0a04;
+    border-radius: 2px;
+    opacity: 0.65;
+  }
+
+  /* When the tile is a preview of the character with an item on */
+  .tile .preview-stack {
+    position: relative;
+    width: 82%;
+    height: 82%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .tile .preview-stack img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: bottom center;
+  }
+  /* Simple colored garment for tile previews (until real art) */
+  .garment-swatch {
+    position: absolute;
+    left: 22%;
+    right: 22%;
+    top: 40%;
+    bottom: 26%;
+    border: 2px solid #1a0a04;
+    border-radius: 4px 4px 2px 2px;
+    box-shadow: inset 0 3px 0 rgba(255,255,255,0.25), inset 0 -3px 0 rgba(0,0,0,0.25);
+  }
+  .bottoms-swatch {
+    position: absolute;
+    left: 30%;
+    right: 30%;
+    top: 65%;
+    bottom: 8%;
+    border: 2px solid #1a0a04;
+    border-radius: 2px 2px 3px 3px;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.25);
+  }
+
+  /* Site credit — bottom of page, matches homepage */
+  .site-credit {
+    position: relative;
+    z-index: 20;
+    margin: 24px auto 0;
+    padding: 10px 16px 18px;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #f0e0c8;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5);
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 100%);
+  }
+  @media (max-width: 640px) { .site-credit { font-size: 11px; padding: 12px 14px 22px; } }
+</style>
+</head>
+<body>
+
+<!-- Storefront sign -->
+<div class="topbar-wrap">
+  <img class="sign-bg" src="assets/storefront-sign-v2.png" alt="">
+  <div class="topbar">
+    <a class="brand" href="index.html">
+      <img src="assets/uptown-baby-v2-cropped.png" alt="UPTOWN BABY">
+    </a>
+    <a class="avatar-star" href="index.html" aria-label="Go back">
+      <img class="face" src="assets/avatar-button.png?v=2" alt="Go back">
+      <span class="goback-bubble">Go Back!</span>
+    </a>
+  </div>
+</div>
+
+<div class="storefront">
+
+  <!-- Pelmet -->
+  <div class="pelmet-box">
+    <div class="pelmet-top"></div>
+    <div class="pelmet-face"></div>
+    <div class="pelmet-bottom"></div>
+  </div>
+
+  <!-- Shutter -->
+  <div class="spine">
+    <h1 class="creator-title">
+      <span class="star">★</span> Customize Ksuuvi <span class="star">★</span>
+    </h1>
+
+    <!-- Character canvas -->
+    <div class="canvas-frame" id="canvasFrame">
+      <img class="canvas-bg" id="canvasBg" alt="" style="display:none;">
+      <img class="canvas-accessory" id="canvasAccessory" alt="" style="display:none;">
+      <span class="corner-star tl">★</span>
+      <span class="corner-star br">★</span>
+      <div class="name-tag" id="nameTag" title="Click to name your Ksuuvi">
+        <input class="name-tag-input" id="nameTagInput" type="text" maxlength="14" placeholder="YOUR NAME" spellcheck="false" autocomplete="off">
+      </div>
+      <div class="character-stack" id="characterStack">
+        <!-- Fully-composited avatar (skin + mouth + future overlays) drawn here. -->
+        <canvas id="charBase" width="1024" height="1024" aria-label="Your Ksuuvi"></canvas>
+      </div>
+
+    </div>
+
+    <!-- Name tag color picker + show/hide toggle -->
+    <div class="name-tag-colors" id="nameTagColors" role="radiogroup" aria-label="Name tag color">
+      <span class="label">Show Tag</span>
+      <label class="tag-toggle" title="Show or hide the name tag">
+        <input type="checkbox" id="nameTagToggle" checked>
+        <span class="track" aria-hidden="true"></span>
+      </label>
+      <span class="label tag-color-label">Color</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="action-row">
+      <button class="action-btn" id="btnRandomize"><span class="star">★</span> Randomize</button>
+      <button class="action-btn" id="btnReset">Reset</button>
+    </div>
+    <div class="action-row share-row">
+      <button class="action-btn share-btn" id="btnSave" title="Download as PNG">
+        <svg class="share-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        Save Image
+      </button>
+      <button class="action-btn share-btn share-ig" id="btnShareIG" title="Share on Instagram">
+        <svg class="share-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/></svg>
+        Instagram
+      </button>
+      <button class="action-btn share-btn share-x" id="btnShareX" title="Share on X">
+        <svg class="share-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M17.53 3H20.5l-6.48 7.4L21.75 21h-5.99l-4.7-6.14L5.6 21H2.6l6.94-7.93L2.25 3h6.14l4.24 5.62L17.53 3zm-1.05 16.2h1.66L7.6 4.72H5.83l10.65 14.48z"/></svg>
+        Share on X
+      </button>
+    </div>
+
+    <!-- Category tabs -->
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-cat="skins">Skin</button>
+      <button class="tab" data-cat="tops">Tops</button>
+      <button class="tab" data-cat="bottoms">Bottoms</button>
+      <button class="tab" data-cat="hairs">Hair</button>
+      <button class="tab" data-cat="hats">Hats</button>
+      <button class="tab" data-cat="eyes">Eyes</button>
+      <button class="tab" data-cat="accessories">Accessories</button>
+      <button class="tab" data-cat="mouths">Mouths</button>
+      <button class="tab" data-cat="backgrounds">Backgrounds</button>
+    </div>
+
+    <!-- Wardrobe -->
+    <div class="wardrobe">
+      <div class="wardrobe-title">Pick your <span class="accent" id="wardrobeCategory">skin</span></div>
+      <div class="grid" id="wardrobeGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Share-to-Instagram modal (IG has no web image share intent) -->
+<div class="share-modal-backdrop" id="shareModal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
+  <div class="share-modal">
+    <h2 id="shareModalTitle">Share to Instagram</h2>
+    <p>Your Ksuuvi image was saved. Instagram doesn't allow direct posting from the web, so here's the flow:</p>
+    <ol>
+      <li>Open the Instagram app</li>
+      <li>Tap <b>+ New Post</b> (or Story)</li>
+      <li>Pick the <b>ksuuvi-avatar.png</b> file you just downloaded</li>
+      <li>Tag <b>@uptownbaby</b> so we can repost!</li>
+    </ol>
+    <div class="modal-actions">
+      <button class="modal-btn primary" id="modalOpenIG">Open Instagram</button>
+      <button class="modal-btn" id="modalClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Feedback toast -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  // --- Wardrobe data ---
+  // "None" is always index 0.
+  const BACKGROUNDS = [
+    { id: 'none',        label: 'None' },
+    { id: 'uptown-brick', label: 'Uptown Brick', img: 'assets/bg-uptown-brick.png' },
+    { id: 'uptown-blue',  label: 'Uptown Blue',  img: 'assets/bg-uptown-blue.png' },
+    { id: 'buckets-green',  label: 'Green',   img: 'assets/bg-buckets-green.png' },
+    { id: 'buckets-purple', label: 'Purple',  img: 'assets/bg-buckets-purple.png' },
+    { id: 'buckets-red',    label: 'Red',     img: 'assets/bg-buckets-red.png' },
+    { id: 'buckets-yellow', label: 'Yellow',  img: 'assets/bg-buckets-yellow.png' },
+  ];
+  // Accessories render BEHIND the character (between the background and the
+  // character stack). Full-canvas PNGs sized to fit the frame.
+  const ACCESSORIES = [
+    { id: 'none',     label: 'None' },
+    { id: 'speakers', label: 'Speakers', img: 'assets/accessories/speakers-stack.png?v=2' },
+    { id: 'cars',     label: 'Cars',     img: 'assets/accessories/cars.png?v=1' },
+  ];
+  // Mouths overlay the composed outfit — aligned to the 1024x1024 character canvas.
+  const MOUTHS = [
+    { id: 'none',  label: 'None' },
+    { id: 'angry', label: 'Angry', img: 'assets/mouths/mouth-angry.png' },
+    { id: 'smile', label: 'Smile', img: 'assets/mouths/mouth-smile.png' },
+  ];
+
+  // Skins swap the underlying base avatar PNG + its matching head overlay.
+  // Each skin has:
+  //   img  — the full-body base drawn as layer 1
+  //   head — the head crop drawn on top of the shirt so the shirt collar
+  //          tucks under the jawline. Head skin tone matches the body.
+  const SKINS = [
+    { id: 'medium',  label: 'Medium', img: 'assets/skins/skin-default.png', head: 'assets/head-overlay.png' },
+    { id: 'light',   label: 'Light',  img: 'assets/skins/skin-light.png',   head: 'assets/skins/head-light.png' },
+    { id: 'brown',   label: 'Brown',  img: 'assets/skins/skin-brown.png',   head: 'assets/skins/head-brown.png' },
+    { id: 'dark',    label: 'Dark',   img: 'assets/skins/skin-dark.png?v=2', head: 'assets/skins/head-dark.png?v=2' },
+  ];
+
+  // Helper: currently-selected head overlay (paired with the current skin).
+  function currentHeadSrc() {
+    const s = SKINS[state.selected.skins] || SKINS[0];
+    return s.head;
+  }
+
+  // Tops are shirt PNGs that overlay the skin BELOW the head layer.
+  const TOPS = [
+    { id: 'none',    label: 'None' },
+    { id: 'supreme', label: 'Supreme Rugby', img: 'assets/tops/top-supreme.png' },
+    { id: 'guns',    label: 'Guns Tee',      img: 'assets/tops/top-guns.png' },
+    { id: '1c34',    label: '1c34 Tee',      img: 'assets/tops/top-1c34.png' },
+    { id: 'hoodie',  label: 'Grey Hoodie',   img: 'assets/tops/top-hoodie.png' },
+  ];
+
+  // Eyes overlay the default eyes on the head PNG. Index 0 = None keeps
+  // the default eye color that's already baked into the head crop.
+  const EYES = [
+    { id: 'black', label: 'Black', img: 'assets/eyes/eyes-black.png' },
+    { id: 'blue',  label: 'Blue',  img: 'assets/eyes/eyes-blue.png?v=2' },
+    { id: 'green', label: 'Green', img: 'assets/eyes/eyes-green.png?v=2' },
+    { id: 'red',   label: 'Red',   img: 'assets/eyes/eyes-red.png' },
+  ];
+
+  // Hats sit on top of hair so they cover the crown naturally.
+  // Hat items support optional layout tweaks:
+  //   scale   — 1 = fill canvas, 0.5 = half size (centered)
+  //   offsetY — fraction of canvas height, negative moves UP
+  //   offsetX — fraction of canvas width, negative moves LEFT
+  const HATS = [
+    { id: 'none',         label: 'None' },
+    { id: 'beanie-grey',  label: 'Grey Beanie',  img: 'assets/hats/hat-beanie-grey.png' },
+    { id: '1c-blue',      label: '1c Snapback',  img: 'assets/hats/hat-1c-blue.png?v=2' },
+  ];
+
+  // Hairs are drawn on top of the head so they sit on the scalp naturally.
+  const HAIRS = [
+    { id: 'none',          label: 'None' },
+    { id: 'black-long',    label: 'Long Black',   img: 'assets/hairs/hair-black-long.png' },
+    { id: 'black-afro',    label: 'Black Afro',   img: 'assets/hairs/hair-black-afro.png?v=2' },
+    { id: 'brown-long',    label: 'Long Brown',   img: 'assets/hairs/hair-brown-long.png?v=2' },
+    { id: 'brown-braids',  label: 'Brown Braids', img: 'assets/hairs/hair-brown-braids.png' },
+  ];
+
+  // Bottoms are pants+shoes PNGs. Rendered UNDER shirts so tees/hoodies hang
+  // over the waistband naturally.
+  const BOTTOMS = [
+    { id: 'none',           label: 'None' },
+    { id: 'jeans-vans',     label: 'Jeans + Vans',      img: 'assets/bottoms/bottom-jeans-vans.png' },
+    { id: 'black-chucks',   label: 'Black + Chucks',    img: 'assets/bottoms/bottom-black-chucks.png' },
+    { id: 'black-crocs',    label: 'Black + Crocs',     img: 'assets/bottoms/bottom-black-crocs.png' },
+    { id: 'sweats-slides',  label: 'Sweats + Slides',   img: 'assets/bottoms/bottom-sweats-slides.png' },
+  ];
+
+  const CATS = { skins: SKINS, tops: TOPS, bottoms: BOTTOMS, hairs: HAIRS, hats: HATS, eyes: EYES, backgrounds: BACKGROUNDS, accessories: ACCESSORIES, mouths: MOUTHS };
+
+  // --- State ---
+  const state = {
+    category: 'skins',
+    selected: { skins: 0, tops: 0, bottoms: 0, hairs: 0, hats: 0, eyes: 0, backgrounds: 0, accessories: 0, mouths: 0 },
+    name: '',
+  };
+
+  // Helper: current base avatar PNG path (driven by Skin tab selection).
+  function currentBaseSrc() {
+    const s = SKINS[state.selected.skins] || SKINS[0];
+    return s.img;
+  }
+
+  const LS_KEY = 'ksuuvi_avatar_v9';
+  try {
+    const saved = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+    if (saved && saved.selected) state.selected = { ...state.selected, ...saved.selected };
+    if (saved && saved.category) state.category = saved.category;
+    if (saved && typeof saved.name === 'string') state.name = saved.name;
+    if (saved && typeof saved.nameColor === 'number') state.nameColor = saved.nameColor;
+    if (saved && typeof saved.showTag === 'boolean') state.showTag = saved.showTag;
+  } catch (e) {}
+
+  const persist = () => {
+    try { localStorage.setItem(LS_KEY, JSON.stringify({ selected: state.selected, category: state.category, name: state.name, nameColor: state.nameColor, showTag: state.showTag })); } catch (e) {}
+  };
+
+  // --- Name tag input + color picker ---
+  const NAME_TAG_COLORS = [
+    { id: 'red',    top: '#d64a2a', bot: '#a02818' },
+    { id: 'green',  top: '#3ea54a', bot: '#1f6a2a' },
+    { id: 'purple', top: '#8a3ec8', bot: '#5a1f88' },
+    { id: 'blue',   top: '#2f6ed6', bot: '#173d88' },
+    { id: 'yellow', top: '#f2c93a', bot: '#b88a12' },
+  ];
+  if (typeof state.nameColor !== 'number') state.nameColor = 0;
+  if (typeof state.showTag !== 'boolean') state.showTag = true;
+
+  const nameTagEl = document.getElementById('nameTag');
+  function applyNameTagColor() {
+    const c = NAME_TAG_COLORS[state.nameColor] || NAME_TAG_COLORS[0];
+    if (nameTagEl) {
+      nameTagEl.style.setProperty('--tag-top', c.top);
+      nameTagEl.style.setProperty('--tag-bot', c.bot);
+    }
+  }
+  applyNameTagColor();
+
+  const nameTagColorsEl = document.getElementById('nameTagColors');
+  if (nameTagColorsEl) {
+    NAME_TAG_COLORS.forEach((c, idx) => {
+      const sw = document.createElement('div');
+      sw.className = 'tag-swatch' + (state.nameColor === idx ? ' selected' : '');
+      sw.style.background = `linear-gradient(180deg, ${c.top} 0%, ${c.bot} 100%)`;
+      sw.title = c.id;
+      sw.setAttribute('role', 'radio');
+      sw.setAttribute('aria-checked', state.nameColor === idx ? 'true' : 'false');
+      sw.addEventListener('click', () => {
+        state.nameColor = idx;
+        applyNameTagColor();
+        nameTagColorsEl.querySelectorAll('.tag-swatch').forEach((el, i) => {
+          el.classList.toggle('selected', i === idx);
+          el.setAttribute('aria-checked', i === idx ? 'true' : 'false');
+        });
+        persist();
+      });
+      nameTagColorsEl.appendChild(sw);
+    });
+  }
+
+  const nameTagInput = document.getElementById('nameTagInput');
+  if (nameTagInput) {
+    nameTagInput.value = state.name || '';
+    nameTagInput.addEventListener('input', () => {
+      state.name = nameTagInput.value.toUpperCase().slice(0, 14);
+      if (nameTagInput.value !== state.name) nameTagInput.value = state.name;
+      persist();
+    });
+  }
+
+  // Show/hide toggle for the name tag: hides the DOM tag on the preview and
+  // skips the tag draw during PNG export.
+  function applyTagVisibility() {
+    if (nameTagEl) nameTagEl.classList.toggle('hidden', !state.showTag);
+  }
+  applyTagVisibility();
+  const nameTagToggleEl = document.getElementById('nameTagToggle');
+  if (nameTagToggleEl) {
+    nameTagToggleEl.checked = state.showTag;
+    nameTagToggleEl.addEventListener('change', () => {
+      state.showTag = nameTagToggleEl.checked;
+      applyTagVisibility();
+      persist();
+    });
+  }
+
+  // --- Rendering ---
+  const gridEl = document.getElementById('wardrobeGrid');
+  const wardrobeCategoryEl = document.getElementById('wardrobeCategory');
+  const charBase     = document.getElementById('charBase');
+  const canvasBg     = document.getElementById('canvasBg');
+  const canvasAccessory = document.getElementById('canvasAccessory');
+  const canvasFrame  = document.getElementById('canvasFrame');
+
+  // Cache of loaded HTMLImageElements by src, so we don't re-fetch every render.
+  // Load with crossOrigin='anonymous' first (needed for getImageData without
+  // taint), but fall back to a plain load if that fails — we'd rather show
+  // the avatar than block on CORS.
+  const imageCache = new Map();
+  function getImage(src) {
+    if (imageCache.has(src)) return imageCache.get(src);
+    const load = (useCors) => new Promise((res, rej) => {
+      const img = new Image();
+      if (useCors) img.crossOrigin = 'anonymous';
+      img.onload = () => res(img);
+      img.onerror = () => rej(new Error('image load failed: ' + src));
+      img.src = src;
+    });
+    const p = load(true).catch(() => load(false));
+    imageCache.set(src, p);
+    return p;
+  }
+
+  // Init: preload the default skin so the canvas has correct dimensions.
+  async function initBaseAvatar() {
+    const img = await getImage(currentBaseSrc());
+    charBase.width = img.naturalWidth;
+    charBase.height = img.naturalHeight;
+  }
+
+  // Render the character into #charBase.
+  // Layer order (bottom → top): skin → bottoms → shirt → head → eyes → mouth → hair → hat.
+  // Bottoms go under the shirt so tees hang over the waistband; head sits on
+  // top of the shirt so the collar tucks under the jawline; hair sits on the
+  // head; mouth is drawn last on top of the face.
+  async function renderRecoloredOutfit() {
+    // Load the currently-selected skin PNG and size the canvas to it.
+    let skinImg = null;
+    try {
+      skinImg = await getImage(currentBaseSrc());
+    } catch (e) {
+      console.error('skin load failed', e);
+    }
+    const w = skinImg ? skinImg.naturalWidth  : 1024;
+    const h = skinImg ? skinImg.naturalHeight : 1024;
+
+    charBase.width = w; charBase.height = h;
+    const ctx = charBase.getContext('2d');
+    ctx.clearRect(0, 0, w, h);
+
+    // 1. Skin (body base)
+    if (skinImg) ctx.drawImage(skinImg, 0, 0, w, h);
+
+    // 2. Bottoms (pants + shoes) — drawn under the shirt so the shirt hem
+    //    overlaps the waistband naturally.
+    try {
+      const bottomItem = BOTTOMS[state.selected.bottoms] || BOTTOMS[0];
+      if (bottomItem && bottomItem.id !== 'none' && bottomItem.img) {
+        const img = await getImage(bottomItem.img);
+        ctx.drawImage(img, 0, 0, w, h);
+      }
+    } catch (e) { /* bottom optional */ }
+
+    // 3. Shirt — overlaid on the body, but UNDER the head so the collar tucks in
+    try {
+      const topItem = TOPS[state.selected.tops] || TOPS[0];
+      if (topItem && topItem.id !== 'none' && topItem.img) {
+        const img = await getImage(topItem.img);
+        ctx.drawImage(img, 0, 0, w, h);
+      }
+    } catch (e) { /* top optional */ }
+
+    // 4. Head overlay — always drawn on top of the shirt so the shirt appears
+    //    to be worn under the head/neck. Uses the head that matches the
+    //    currently-selected skin tone.
+    try {
+      const headImg = await getImage(currentHeadSrc());
+      ctx.drawImage(headImg, 0, 0, w, h);
+    } catch (e) { /* head overlay optional */ }
+
+    // 4b. Eyes — recolor overlay stamped on the head's default eyes.
+    //     UNDER hair/hat so bangs and beanies still cover them.
+    try {
+      const eyesItem = EYES[state.selected.eyes] || EYES[0];
+      if (eyesItem && eyesItem.id !== 'none' && eyesItem.img) {
+        const img = await getImage(eyesItem.img);
+        ctx.drawImage(img, 0, 0, w, h);
+      }
+    } catch (e) { /* eyes optional */ }
+
+    // 5. Mouth — stamped on the face, UNDER hair so bangs can cover it.
+    try {
+      const mouthItem = MOUTHS[state.selected.mouths] || MOUTHS[0];
+      if (mouthItem && mouthItem.id !== 'none' && mouthItem.img) {
+        const img = await getImage(mouthItem.img);
+        ctx.drawImage(img, 0, 0, w, h);
+      }
+    } catch (e) { /* mouth optional */ }
+
+    // 6. Hair — sits on top of the head/scalp, covering any stray mouth pixels.
+    try {
+      const hairItem = HAIRS[state.selected.hairs] || HAIRS[0];
+      if (hairItem && hairItem.id !== 'none' && hairItem.img) {
+        const img = await getImage(hairItem.img);
+        ctx.drawImage(img, 0, 0, w, h);
+      }
+    } catch (e) { /* hair optional */ }
+
+    // 7. Hat — sits on top of the hair. Supports per-hat scale + offsets for
+    //    fine-tuning fit independently of other layers.
+    try {
+      const hatItem = HATS[state.selected.hats] || HATS[0];
+      if (hatItem && hatItem.id !== 'none' && hatItem.img) {
+        const img = await getImage(hatItem.img);
+        const s  = hatItem.scale   || 1;
+        const ox = (hatItem.offsetX || 0) * w;
+        const oy = (hatItem.offsetY || 0) * h;
+        const dw = w * s, dh = h * s;
+        // center horizontally at s<1, then apply offsets
+        const dx = (w - dw) / 2 + ox;
+        const dy = (h - dh) / 2 + oy;
+        ctx.drawImage(img, dx, dy, dw, dh);
+      }
+    } catch (e) { /* hat optional */ }
+  }
+
+  function renderBackground() {
+    const bg = BACKGROUNDS[state.selected.backgrounds] || BACKGROUNDS[0];
+    if (bg.id === 'none' || !bg.img) {
+      canvasBg.style.display = 'none';
+      canvasBg.removeAttribute('src');
+    } else {
+      canvasBg.src = bg.img;
+      canvasBg.style.display = '';
+    }
+    renderAccessory();
+  }
+  function renderAccessory() {
+    const acc = ACCESSORIES[state.selected.accessories] || ACCESSORIES[0];
+    if (!acc || acc.id === 'none' || !acc.img) {
+      canvasAccessory.style.display = 'none';
+      canvasAccessory.removeAttribute('src');
+    } else {
+      canvasAccessory.src = acc.img;
+      canvasAccessory.style.display = '';
+    }
+  }
+
+  function imgHTML(src) {
+    // loading="lazy" + decoding="async" keeps the browser from choking when many PNGs exist
+    return `<img class="garment-img" src="${src}" alt="" loading="lazy" decoding="async">`;
+  }
+
+  function renderCharacter() {
+    charBase.style.visibility = 'visible';
+    renderRecoloredOutfit();
+  }
+
+  function tilePreviewHTML(item, cat) {
+    const baseSrc = currentBaseSrc();
+    if (item.id === 'none') {
+      return `<div class="none-dash"></div>`;
+    }
+    // Skin tiles: just the skin PNG on its own
+    if (cat === 'skins') {
+      return `<img class="thumb" src="${item.img}" alt="" loading="lazy" decoding="async">`;
+    }
+    // Background tiles are just the background image itself — no character overlay
+    if (cat === 'backgrounds') {
+      return `<img class="thumb" src="${item.img}" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;object-position:center;">`;
+    }
+    // Mouth tiles show the overlay on the base head
+    if (cat === 'mouths') {
+      return `
+        <div class="preview-stack">
+          <img class="thumb" src="${baseSrc}" alt="" loading="lazy" decoding="async">
+          <img class="thumb overlay" src="${item.img}" alt="" loading="lazy" decoding="async">
+        </div>
+      `;
+    }
+    const headSrc = currentHeadSrc();
+    // Top tiles: skin body → shirt → head on top (same order as canvas)
+    if (cat === 'tops') {
+      return `
+        <div class="preview-stack">
+          <img class="thumb" src="${baseSrc}" alt="" loading="lazy" decoding="async">
+          <img class="thumb overlay" src="${item.img}" alt="" loading="lazy" decoding="async">
+          <img class="thumb overlay" src="${headSrc}" alt="" loading="lazy" decoding="async">
+        </div>
+      `;
+    }
+    // Bottom tiles: skin body → pants → head on top
+    if (cat === 'bottoms') {
+      return `
+        <div class="preview-stack">
+          <img class="thumb" src="${baseSrc}" alt="" loading="lazy" decoding="async">
+          <img class="thumb overlay" src="${item.img}" alt="" loading="lazy" decoding="async">
+          <img class="thumb overlay" src="${headSrc}" alt="" loading="lazy" decoding="async">
+        </div>
+      `;
+    }
+    // Hair tiles: skin body → head → hair on top
+    if (cat === 'hairs') {
+      return `
+        <div class="preview-stack">
+          <img class="thumb" src="${baseSrc}" alt="" loading="lazy" decoding="async">
+          <img class="thumb overlay" src="${headSrc}" alt="" loading="lazy" decoding="async">
+          <img class="thumb overlay" src="${item.img}" alt="" loading="lazy" decoding="async">
+        </div>
+      `;
+    }
+    // Hat tiles: skin body → head → hat on top
+    if (cat === 'hats') {
+      const s   = item.scale   || 1;
+      const oxP = ((item.offsetX || 0) * 100).toFixed(2);
+      const oyP = ((item.offsetY || 0) * 100).toFixed(2);
+      const hatStyle = `transform: translate(${oxP}%, ${oyP}%) scale(${s}); transform-origin: center;`;
+      return `
+        <div class="preview-stack">
+          <img class="thumb" src="${baseSrc}" alt="" loading="lazy" decoding="async">
+          <img class="thumb overlay" src="${headSrc}" alt="" loading="lazy" decoding="async">
+          <img class="thumb overlay" src="${item.img}" alt="" loading="lazy" decoding="async" style="${hatStyle}">
+        </div>
+      `;
+    }
+    // Eye tiles: skin body → head → eyes overlay on top
+    if (cat === 'eyes') {
+      return `
+        <div class="preview-stack">
+          <img class="thumb" src="${baseSrc}" alt="" loading="lazy" decoding="async">
+          <img class="thumb overlay" src="${headSrc}" alt="" loading="lazy" decoding="async">
+          <img class="thumb overlay" src="${item.img}" alt="" loading="lazy" decoding="async">
+        </div>
+      `;
+    }
+    // Accessory tiles show the accessory PNG on its own
+    if (cat === 'accessories') {
+      return `<img class="thumb" src="${item.img}" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;">`;
+    }
+    return `
+      <div class="preview-stack">
+        <img class="thumb" src="${baseSrc}" alt="" loading="lazy" decoding="async">
+        ${item.img ? imgHTML(item.img) : ''}
+      </div>
+    `;
+  }
+
+  function renderWardrobe() {
+    const cat = state.category;
+    wardrobeCategoryEl.textContent = cat;
+    gridEl.innerHTML = '';
+
+    const items = CATS[cat];
+    items.forEach((item, idx) => {
+      const tile = document.createElement('div');
+      tile.className = 'tile' + (state.selected[cat] === idx ? ' selected' : '');
+      tile.innerHTML = tilePreviewHTML(item, cat);
+      tile.addEventListener('click', () => {
+        state.selected[cat] = idx;
+        persist();
+        renderWardrobe();
+        renderCharacter();
+        renderBackground();
+      });
+      gridEl.appendChild(tile);
+    });
+  }
+
+  // --- Tabs ---
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      if (tab.classList.contains('disabled')) return;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      state.category = tab.dataset.cat;
+      persist();
+      renderWardrobe();
+    });
+  });
+  // Restore active tab from state
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.cat === state.category);
+  });
+
+  // --- Action buttons ---
+  document.getElementById('btnRandomize').addEventListener('click', () => {
+    // These have "None" at index 0 — skip it so randomize always picks a real
+    // item and doesn't repeatedly land on "no shirt / no hair / etc".
+    for (const cat of ['backgrounds', 'accessories', 'mouths', 'tops', 'bottoms', 'hairs', 'hats']) {
+      const len = CATS[cat].length;
+      if (len > 1) state.selected[cat] = 1 + Math.floor(Math.random() * (len - 1));
+    }
+    // These have no "None" — pick any index across the full array.
+    for (const cat of ['skins', 'eyes']) {
+      const len = CATS[cat].length;
+      state.selected[cat] = Math.floor(Math.random() * len);
+    }
+    persist();
+    renderWardrobe();
+    renderCharacter();
+    renderBackground();
+  });
+  document.getElementById('btnReset').addEventListener('click', () => {
+    state.selected = { skins: 0, tops: 0, bottoms: 0, hairs: 0, hats: 0, eyes: 0, backgrounds: 0, accessories: 0, mouths: 0 };
+    persist();
+    renderWardrobe();
+    renderCharacter();
+    renderBackground();
+  });
+
+  // --- Save Avatar: composite everything into a PNG and trigger download ---
+  async function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
+  async function exportAvatarPNG() {
+    const SIZE = 1024;
+    const canvas = document.createElement('canvas');
+    canvas.width = SIZE; canvas.height = SIZE;
+    const ctx = canvas.getContext('2d');
+
+    // 1. Background
+    const bg = BACKGROUNDS[state.selected.backgrounds] || BACKGROUNDS[0];
+    if (bg.id !== 'none' && bg.img) {
+      try {
+        const bgImg = await loadImage(bg.img);
+        const scale = Math.max(SIZE / bgImg.width, SIZE / bgImg.height);
+        const w = bgImg.width * scale, h = bgImg.height * scale;
+        ctx.drawImage(bgImg, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
+      } catch (e) { ctx.fillStyle = '#f4ecd8'; ctx.fillRect(0,0,SIZE,SIZE); }
+    } else {
+      ctx.fillStyle = '#f4ecd8';
+      ctx.fillRect(0, 0, SIZE, SIZE);
+    }
+
+    // 2. Accessory (behind the character, on top of background)
+    const acc = ACCESSORIES[state.selected.accessories] || ACCESSORIES[0];
+    if (acc && acc.id !== 'none' && acc.img) {
+      try {
+        const accImg = await loadImage(acc.img);
+        const scale = Math.min(SIZE / accImg.width, SIZE / accImg.height);
+        const w = accImg.width * scale, h = accImg.height * scale;
+        ctx.drawImage(accImg, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
+      } catch (e) { /* accessory optional */ }
+    }
+
+    // 3. Character
+    const padX = SIZE * 0.08;
+    const padTop = SIZE * 0.06;
+    const padBot = SIZE * 0.04;
+    const boxW = SIZE - padX * 2;
+    const boxH = SIZE - padTop - padBot;
+
+    // Draw the character contain-fit + bottom-aligned, no outline.
+    // The base avatar art already contains all the black linework it needs,
+    // and the beanie-overlay PNG patches the corner detail.
+    function drawWithOutline(source) {
+      const iw = source.width || source.naturalWidth;
+      const ih = source.height || source.naturalHeight;
+      const scale = Math.min(boxW / iw, boxH / ih);
+      const w = iw * scale, h = ih * scale;
+      const x = (SIZE - w) / 2;
+      const y = padTop + boxH - h;
+      ctx.drawImage(source, x, y, w, h);
+    }
+
+    // The visible #charBase canvas already contains the fully-composited,
+    // recolored outfit — just draw it.
+    try {
+      drawWithOutline(charBase);
+    } catch (e) { console.error('character draw failed', e); }
+
+    // 4. Name tag — stamped over the beanie in the same storefront-sign style.
+    //    Skipped entirely when the show-tag toggle is off.
+    const nameStr = (state.name || '').trim();
+    if (nameStr && state.showTag) {
+      const cx = SIZE / 2;
+      const cy = SIZE * 0.185;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(-3 * Math.PI / 180);
+      const fontSize = Math.max(28, Math.round(SIZE * 0.045));
+      ctx.font = `italic 900 ${fontSize}px Arial, Helvetica, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const textW = ctx.measureText(nameStr).width;
+      const padX = fontSize * 0.75;
+      const padY = fontSize * 0.35;
+      const tagW = textW + padX * 2;
+      const tagH = fontSize + padY * 2;
+      // Outer black frame
+      ctx.fillStyle = '#1a0a04';
+      ctx.fillRect(-tagW/2 - 4, -tagH/2 - 4, tagW + 8, tagH + 8);
+      // Colored gradient fill (matches selected tag color)
+      const tagColor = NAME_TAG_COLORS[state.nameColor] || NAME_TAG_COLORS[0];
+      const grad = ctx.createLinearGradient(0, -tagH/2, 0, tagH/2);
+      grad.addColorStop(0, tagColor.top);
+      grad.addColorStop(1, tagColor.bot);
+      ctx.fillStyle = grad;
+      ctx.fillRect(-tagW/2, -tagH/2, tagW, tagH);
+      // Text with black outline
+      ctx.lineWidth = Math.max(3, fontSize * 0.12);
+      ctx.strokeStyle = '#1a0a04';
+      ctx.strokeText(nameStr, 0, 2);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(nameStr, 0, 2);
+      ctx.restore();
+    }
+
+    return canvas;
+  }
+
+  // Convert exported canvas → { dataUrl, blob, file }
+  async function buildExportPayload() {
+    const canvas = await exportAvatarPNG();
+    const dataUrl = canvas.toDataURL('image/png');
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    const file = new File([blob], 'ksuuvi-avatar.png', { type: 'image/png' });
+    return { dataUrl, blob, file };
+  }
+
+  function downloadDataUrl(dataUrl, filename) {
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  // --- Toast ---
+  const toastEl = document.getElementById('toast');
+  let toastTimer = null;
+  function showToast(msg, duration = 2200) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
+  }
+
+  // --- Modal ---
+  const modalEl = document.getElementById('shareModal');
+  function openModal() { modalEl.classList.add('open'); }
+  function closeModal() { modalEl.classList.remove('open'); }
+  modalEl.addEventListener('click', (e) => { if (e.target === modalEl) closeModal(); });
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('modalOpenIG').addEventListener('click', () => {
+    // Try to open the Instagram app; on desktop this just tries the site
+    window.open('https://www.instagram.com/', '_blank');
+    closeModal();
+  });
+
+  // Utility: flash button feedback
+  function flashBtn(btn, text, ok = true) {
+    const orig = btn.dataset.origHtml || btn.innerHTML;
+    btn.dataset.origHtml = orig;
+    btn.innerHTML = text;
+    if (ok) btn.style.filter = 'brightness(1.15) saturate(1.1)';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.filter = ''; }, 1400);
+  }
+
+  // --- Save Image ---
+  document.getElementById('btnSave').addEventListener('click', async () => {
+    const btn = document.getElementById('btnSave');
+    btn.disabled = true;
+    try {
+      const { dataUrl } = await buildExportPayload();
+      downloadDataUrl(dataUrl, 'ksuuvi-avatar.png');
+      flashBtn(btn, '✓ Saved!');
+    } catch (e) {
+      console.error(e);
+      flashBtn(btn, '✗ Failed', false);
+    }
+    setTimeout(() => { btn.disabled = false; }, 1400);
+  });
+
+  // --- Share to Instagram ---
+  // IG has no direct web share intent for images. Best flow:
+  //  1. Try native Web Share API with the image file (mobile — lets user pick IG)
+  //  2. Fallback: download the image + open a modal explaining next steps
+  document.getElementById('btnShareIG').addEventListener('click', async () => {
+    const btn = document.getElementById('btnShareIG');
+    btn.disabled = true;
+    try {
+      const { dataUrl, file } = await buildExportPayload();
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'My Ksuuvi',
+            text: 'Built my Ksuuvi at www.uptownbaby.net',
+          });
+          flashBtn(btn, '✓ Shared!');
+        } catch (err) {
+          // User canceled — no fallback needed
+          if (err.name !== 'AbortError') {
+            console.error(err);
+            downloadDataUrl(dataUrl, 'ksuuvi-avatar.png');
+            openModal();
+          }
+        }
+      } else {
+        // Desktop / unsupported: download + open modal with instructions
+        downloadDataUrl(dataUrl, 'ksuuvi-avatar.png');
+        openModal();
+      }
+    } catch (e) {
+      console.error(e);
+      flashBtn(btn, '✗ Failed', false);
+    }
+    setTimeout(() => { btn.disabled = false; }, 1400);
+  });
+
+  // --- Share to X ---
+  // X supports the intent URL for text + link, but not image upload.
+  // Best flow: download the image, then open the tweet composer with pre-filled text.
+  document.getElementById('btnShareX').addEventListener('click', async () => {
+    const btn = document.getElementById('btnShareX');
+    btn.disabled = true;
+    try {
+      const { dataUrl } = await buildExportPayload();
+      downloadDataUrl(dataUrl, 'ksuuvi-avatar.png');
+      const text = encodeURIComponent('Built my Ksuuvi 🧢 at www.uptownbaby.net');
+      const url  = encodeURIComponent('https://www.uptownbaby.net');
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+      showToast('Image saved — attach it in your tweet!');
+    } catch (e) {
+      console.error(e);
+      flashBtn(btn, '✗ Failed', false);
+    }
+    setTimeout(() => { btn.disabled = false; }, 1400);
+  });
+
+  // Initial paint: load the base avatar, then render everything.
+  // renderCharacter() → renderRecoloredOutfit() is async, so we await it
+  // here to guarantee the canvas actually paints before the IIFE resolves.
+  (async () => {
+    try {
+      await initBaseAvatar();
+    } catch (e) { console.error('base avatar init failed', e); }
+    try {
+      renderWardrobe();
+      renderBackground();
+      await renderRecoloredOutfit();
+    } catch (e) { console.error('initial render failed', e); }
+  })();
+</script>
+
+<div class="site-credit">powered by hyveout</div>
+
+</body>
+</html>
